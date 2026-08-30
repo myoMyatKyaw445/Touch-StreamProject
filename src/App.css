@@ -1,184 +1,823 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
 }
 
-#center {
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  color: #ffffff;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  width: 100%;
+  max-width: 100vw;
+  padding-bottom: 70px;
+  margin: 0;
 }
 
-#next-steps {
+/* Header - Full Width */
+.app-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px 20px;
   display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  width: 100%;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
-  padding: 0;
+.header-left {
   display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.header-right {
+  display: flex;
+  gap: 10px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.2s;
+}
+
+.icon-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Main Content - Full Width */
+.main-content {
+  flex: 1;
+  padding: 15px;
+  padding-bottom: 100px; /* ✅ Bottom Nav အတွက် နေရာလွတ် ချန်ထားမယ် */
+  overflow-y: auto;
+  width: 100%;
+}
+
+/* Category Filter */
+.category-filter {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.category-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 8px;
-  margin: 32px 0 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  min-width: 70px;
+}
 
-  .logo {
-    height: 18px;
+.category-icon {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.category-btn.active .category-icon {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.icon {
+  font-size: 1.8rem;
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4757;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.category-name {
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Status Filter */
+.status-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.status-btn {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  border-radius: 25px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+.check {
+  font-size: 1rem;
+}
+
+/* Match Cards - Mobile (Default - Vertical List) */
+.matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding-bottom: 20px; /* ✅ နောက်ဆုံး Row အတွက် အပိုနေရာ */
+}
+
+
+.match-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+.match-card:hover {
+  transform: translateY(-2px);
+  border-color: #667eea;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.timer-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  text-align: center;
+  padding: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: monospace;
+  width: 100%;
+}
+
+.teams-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  gap: 10px;
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.team-logo-wrapper {
+  position: relative;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.team-logo {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 5px;
+}
+
+.team-logo-fallback {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.team-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  word-break: break-word;
+}
+
+.vs-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.vs-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.league-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.league-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.league-logo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.league-name {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.live-badge {
+  background: #ff4757;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  box-shadow: 0 -4px 20px rgba(102, 126, 234, 0.3);
+  z-index: 100;
+  width: 100%;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 5px 15px;
+  transition: all 0.3s;
+}
+
+.nav-item.active {
+  color: #fff;
+}
+
+.nav-icon {
+  font-size: 1.5rem;
+}
+
+.nav-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.loading,
+.no-matches {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.7);
+  width: 100%;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(102, 126, 234, 0.3);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0c29;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #764ba2;
+}
+
+.category-logo {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.category-btn.active .category-logo {
+  filter: brightness(1.2);
+}
+
+/* Team Score Styling */
+.team-score {
+  background-color: #ef4444;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 15px;
+  min-width: 30px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================== */
+/* DESKTOP & TABLET STYLES (768px and above) */
+/* ========================================== */
+
+@media (min-width: 768px) {
+  .matches-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 15px;
   }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
+}
+  
+  /* Grid Layout */
+  .matches-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 15px;
+  }
+  
+  .match-card {
+    height: 100%;
+    min-height: 200px;
     display: flex;
-    padding: 6px 12px;
+    flex-direction: column; /* Flexbox သုံးပြီး League section ကို အောက်ဆုံးတွန်းမယ် */
+  }
+  
+  .match-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+  }
+  
+  .teams-section {
+    flex: 1; /* Teams section က ကျန်တဲ့ နေရာကို ယူမယ် */
+    padding: 15px;
+  }
+  
+  .team-logo {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .team-logo-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .team-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
+    line-height: 1.2;
+  }
+  
+  .vs-text {
+    font-size: 1.3rem;
+  }
+  
+  .timer-badge {
+    font-size: 0.85rem;
+    padding: 8px;
+  }
+  
+  /* ✅ League Section ကို ပုံစံကျအောင် ပြင်ဆင်ခြင်း */
+  .league-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    min-height: 48px; /* အနည်းဆုံး အမြင့် သတ်မှတ်မယ် */
+    margin-top: auto; /* အောက်ဆုံးကို တွန်းမယ် */
+  }
+  
+  .league-info {
+    display: flex;
     align-items: center;
     gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
+    flex: 1; /* ကျန်တဲ့ နေရာကို ယူမယ် */
+    min-width: 0; /* Text truncation အတွက် */
+  }
+  
+  /* ✅ League Name ကို 1 Line ပဲ ပြပြီး ပိုလျှင်ရင် "..." ဖြတ်မယ် */
+  .league-name {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap; /* 1 line ပဲ ပြမယ် */
+    overflow: hidden; /* ပိုလျှင်တာ ဖျောက်မယ် */
+    text-overflow: ellipsis; /* "..." ပြမယ် */
+    max-width: 100%;
+  }
+  
+  .live-badge {
+    background: #ff4757;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    animation: pulse 2s infinite;
+    flex-shrink: 0; /* Badge ကို မကျုံ့စေရ */
   }
 
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
+
+/* ========================================== */
+/* ANDROID TV & LARGE DESKTOP (1024px+) */
+/* ========================================== */
+
+@media (min-width: 1024px) {
+  .matches-list {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  
+  /* 4 Columns Grid */
+  .matches-list {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  
+  .match-card {
+    min-height: 220px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+  }
+  
+  .match-card:hover {
+    border-color: #667eea;
+    transform: translateY(-6px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+  }
+  
+  .timer-badge {
+    font-size: 0.9rem;
+    padding: 10px;
+    font-weight: 700;
+  }
+  
+  .teams-section {
+    padding: 18px 12px;
+  }
+  
+  .team-logo {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .team-logo-wrapper {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .team-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
+    line-height: 1.2;
+    min-height: 2.4em;
+    display: flex;
+    align-items: center;
     justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
+  }
+  
+  .vs-section {
+    padding: 0 8px;
+  }
+  
+  .vs-text {
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* ✅ TV အတွက် League Section ပိုကောင်းအောင် */
+  .league-section {
+    padding: 12px 15px;
+    min-height: 50px;
+  }
+  
+  .league-name {
+    font-size: 0.9rem;
+  }
+  
+  .live-badge {
+    font-size: 0.75rem;
+    padding: 5px 10px;
   }
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
+/* ========================================== */
+/* EXTRA LARGE SCREENS (TV 4K - 1440px+) */
+/* ========================================== */
+
+@media (min-width: 1440px) {
+  .main-content {
+    padding: 30px;
+    max-width: 1600px;
+  }
+  
+  .matches-list {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  
+  .match-card {
+    min-height: 240px;
+  }
+  
+  .team-logo {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .team-logo-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .team-name {
+    font-size: 1rem;
+  }
+  
+  .league-section {
+    min-height: 55px;
+  }
+  
+  .league-name {
+    font-size: 0.95rem;
   }
 }
 
-.ticks {
-  position: relative;
-  width: 100%;
+/* Mobile Responsive Adjustments */
+@media (max-width: 480px) {
+  .app-title {
+    font-size: 1.2rem;
+  }
+  
+  .category-icon {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .icon {
+    font-size: 1.5rem;
+  }
+  
+  .team-logo {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .team-logo-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .team-name {
+    font-size: 0.75rem;
+  }
+  
+  .vs-text {
+    font-size: 1.1rem;
+  }
+  
+  .status-btn {
+    padding: 8px 15px;
+    font-size: 0.85rem;
+  }
+  
+  .timer-badge {
+    font-size: 0.75rem;
+    padding: 6px;
+  }
+}
 
-  &::before,
-  &::after {
+/* ========================================== */
+/* TV / DESKTOP KEYBOARD NAVIGATION FOCUS (Fixed) */
+/* ========================================== */
+
+@media (min-width: 768px) {
+  /* ၁။ Focusable Item အားလုံးကို Relative ထားမယ် */
+  .focusable-item {
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  /* ၂။ Focus ရောက်တဲ့အခါ အခြေခံ Effect */
+  .focusable-item:focus {
+    outline: none !important; /* လေးထောင့်ကြီး (Outline) ကို ဖျက်ပစ်မယ် */
+    transform: scale(1.03);
+    z-index: 20;
+  }
+
+  /* ========================================== */
+  /* ၃။ Category Button (စက်ဝိုင်းပုံစံ) အတွက် */
+  /* ========================================== */
+  .category-btn.focusable-item:focus {
+    outline: none !important;
+  }
+  
+  /* စက်ဝိုင်း Icon အတွက် အဖြူအကြည် Background */
+  .category-btn.focusable-item:focus .category-icon {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+  }
+
+  /* ========================================== */
+  /* ၄။ Match Card (လေးထောင့်) အတွက် */
+  /* ========================================== */
+  .match-card.focusable-item:focus {
+    outline: none !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  /* Match Card အတွင်းမှာပဲ အဖြူအကြည် Overlay */
+  .match-card.focusable-item:focus::before {
     content: '';
     position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit; /* Card ရဲ့ ထောင့်ချိုးအတိုင်း လိုက်ဖြစ်မယ် */
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  /* ========================================== */
+  /* ၅။ Status Button (အဝိုင်းထောင့်) အတွက် */
+  /* ========================================== */
+  .status-btn.focusable-item:focus {
+    outline: none !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+
+  /* ========================================== */
+  /* ၆။ Bottom Nav Item အတွက် */
+  /* ========================================== */
+  .nav-item.focusable-item:focus {
+    outline: none !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px;
+  }
+}
+
+/* Mobile မှာ Focus Effect ကို လုံးဝ ပိတ်ထားမယ် */
+@media (max-width: 767px) {
+  .focusable-item:focus {
+    outline: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  .focusable-item:focus::before {
+    display: none !important;
+  }
+  
+  .category-btn.focusable-item:focus .category-icon {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: transparent !important;
   }
 }
