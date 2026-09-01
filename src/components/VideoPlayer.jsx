@@ -2,12 +2,27 @@ import { useEffect } from 'react';
 import { openExternalPlayer } from '../utils/openExternalPlayer';
 import './VideoPlayer.css';
 
-export default function VideoPlayer({ match, onLinkClick, onClose }) {
+export default function VideoPlayer({ match, onClose }) {
   const { homeTeam, awayTeam, league, myanmarTime, links } = match;
 
   const handleStreamClick = (url) => {
     openExternalPlayer(url);
     onClose();
+  };
+
+  // Link name ကို တိုအောင် ဖြတ်ပေးမည့် function
+  const shortenLinkName = (name) => {
+    if (!name) return 'Stream';
+    // "VS" ပါရင် နောက်ပိုင်းကို ဖျက်မယ်
+    if (name.includes('VS') || name.includes('vs')) {
+      const parts = name.split(/VS|vs/);
+      return parts[0].trim();
+    }
+    // ၃၀ လုံးကျော်ရင် ြတ်မယ်
+    if (name.length > 30) {
+      return name.substring(0, 30) + '...';
+    }
+    return name;
   };
 
   // 🎯 Keyboard Navigation Logic for Stream Links
@@ -19,7 +34,6 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
       const current = document.activeElement;
       const currentIndex = focusable.indexOf(current);
 
-      // Grid ရဲ့ Column အရေအတွက်ကို တွက်ချက်ခြင်း
       let columns = 1;
       if (focusable.length > 1) {
         const firstTop = focusable[0].offsetTop;
@@ -57,7 +71,7 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
       } 
       else if (e.key === 'Escape' || e.key === 'Backspace') {
         e.preventDefault();
-        onClose(); // Back Key နှိပ်ရင် Homepage ကို ပြန်သွားမယ်
+        onClose();
         return;
       } 
       else {
@@ -67,16 +81,13 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
       if (shouldPreventDefault && currentIndex !== -1) {
         e.preventDefault();
         focusable[nextIndex].focus();
-        focusable[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } else if (currentIndex === -1) {
-        // ဘာမှ Focus မရသေးရင် ပထမဆုံး Link ကို Focus ပေးမယ်
         focusable[0].focus();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     
-    // Overlay ဖွင့်ဖွင့်ချင်း ပထမဆုံး Link Card ကို Auto-focus ပေးမယ်
     setTimeout(() => {
       const firstCard = document.querySelector('.link-card');
       if (firstCard) firstCard.focus();
@@ -86,24 +97,28 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
   }, [links, onClose]);
 
   return (
-    <div className="video-player-overlay">
-      <div className="links-selection">
+    <div className="video-player-overlay" onClick={onClose}>
+      <div className="links-selection" onClick={(e) => e.stopPropagation()}>
+        
+        {/* Header Section */}
         <div className="player-header">
           <div className="match-info">
             <h2>{homeTeam.name} VS {awayTeam.name}</h2>
-            <p className="match-time">🕒 {myanmarTime}</p>
-            <p className="league-name">🏆 {league}</p>
+            <div className="match-meta">
+              <span className="match-time">🕒 {myanmarTime}</span>
+              <span className="league-name">🏆 {league}</span>
+            </div>
           </div>
-          <button onClick={onClose} className="close-btn">✕ ပိတ်မယ်</button>
+          <button onClick={onClose} className="close-btn">✕</button>
         </div>
         
+        {/* Links Section */}
         <div className="links-section">
-          <h3>Stream Links ({links ? links.length : 0})</h3>
-          <p className="section-desc">ကြည့်ရှုရန် Link တစ်ခုကို ရွေးချယ်ပါ (Network Stream Player ဖြင့် ဖွင့်ပါမည်)</p>
+          <h3>Channels ({links ? links.length : 0})</h3>
           
           {!links || links.length === 0 ? (
             <div className="no-links">
-              <p>🚫 ယခုအချိန်တွင် Stream Link မရှိသေးပါ</p>
+              <p>No Stream Available</p>
             </div>
           ) : (
             <div className="links-grid">
@@ -116,8 +131,7 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
                 >
                   <div className="link-icon">📺</div>
                   <div className="link-info">
-                    <h4>{link.name}</h4>
-                    <p>Click to open in External Player</p>
+                    <h4>{shortenLinkName(link.name)}</h4>
                   </div>
                   <div className="link-arrow">→</div>
                 </button>

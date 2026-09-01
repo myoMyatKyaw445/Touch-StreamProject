@@ -96,7 +96,32 @@ body {
   overflow-y: auto;
   width: 100%;
 }
+.filters-wrapper {
+  position: sticky;
+  top: 65px; /* Header အောက်မှာ ကပ်နေအောင် */
+  z-index: 90; /* Header (100) အောက်၊ Match Cards အပေါ်မှာ */
+  background: linear-gradient(180deg, #0f0c29 0%, #302b63 100%);
+  backdrop-filter: blur(10px);
+  padding: 10px 15px;
+  margin-bottom: 0;
+}
 
+.filters-wrapper .category-filter {
+  margin-bottom: 10px;
+}
+
+.filters-wrapper .status-filter {
+  margin-bottom: 0;
+}
+
+/* Main Content - Full Width */
+.main-content {
+  flex: 1;
+  padding: 15px;
+  padding-bottom: 100px;
+  overflow-y: auto; /* ✅ Match Cards တွေပဲ Scroll ဖြစ်အောင် */
+  width: 100%;
+}
 /* Category Filter */
 .category-filter {
   display: flex;

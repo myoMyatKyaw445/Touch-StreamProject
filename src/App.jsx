@@ -23,121 +23,155 @@ function App() {
   ]);
 
   const hasInitialFocused = useRef(false);
-
-    // 🎯 ၁။ Keyboard Navigation Logic (Fixed ArrowUp for Status Filter)
+  const lastFocusedMatchId = useRef(null);
+    // 🎯 Refresh လုပ်တိုင်း Scroll ကို အပေါ်ဆုံး (အစ) ကနေ ပြန်စအောင် လုပ်ဆောင်ခြင်း
+  useEffect(() => {
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollTop = 0; // Scroll ကို အပေါ်ဆုံး ပြန်တင်မယ်
+    }
+    
+    // Browser ရဲ့ Default Scroll Restoration ကို ပိတ်ထားမယ် (Refresh လုပ်ရင် အပေါ်ဆုံးပဲ ရောက်အောင်)
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []); // Component စတင်တဲ့အခါ တစ်ကြိမ်သာ Run မယ်
+  // 🎯 ၁။ Keyboard Navigation Logic (Homepage အတွက် - အပြီးသတ် ပြင်ဆင်ထားသည်)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (window.innerWidth < 768 || selectedMatch) return;
 
-      const mainFocusables = Array.from(document.querySelectorAll('.main-content .focusable-item'));
+      const filterFocusables = Array.from(document.querySelectorAll('.filters-wrapper .focusable-item'));
+      const matchFocusables = Array.from(document.querySelectorAll('.matches-list .focusable-item'));
       const navFocusables = Array.from(document.querySelectorAll('.bottom-nav .focusable-item'));
-      const allFocusables = [...mainFocusables, ...navFocusables];
       
-      if (allFocusables.length === 0) return;
+      if (filterFocusables.length === 0 && matchFocusables.length === 0) return;
 
+      const allFocusables = [...filterFocusables, ...matchFocusables, ...navFocusables];
+      
       const currentElement = document.activeElement;
       const currentIndex = allFocusables.indexOf(currentElement);
 
       if (currentIndex === -1) {
-        allFocusables[0].focus();
+        if (allFocusables.length > 0) allFocusables[0].focus();
         return;
       }
 
       let nextIndex = currentIndex;
       let shouldPreventDefault = true;
       
-      // Grid Column တွက်ချက်ခြင်း (Match Cards အတွက်သာ)
+      // Grid Column တွက်ချက်ခြင်း
       let gridColumns = 1;
       if (window.innerWidth >= 1024) gridColumns = 4;
       else if (window.innerWidth >= 768) gridColumns = Math.floor(window.innerWidth / 260);
+      else gridColumns = 1;
 
-      // Zone ခွဲခြားခြင်း
-      const categoryCount = 2; // VN Server, မြန်မာအသံ
-      const statusCount = 3; // All, Live, Upcoming
-      const topSectionCount = categoryCount + statusCount; // 5
+      // ✅ Zone ခွဲခြားခြင်း (အတိအကျ ပြင်ဆင်ထားသည်)
+      const categoryCount = 2; // VN Server, Myanmar Sound
+      const statusCount = 3;   // All, Live, Upcoming
+      const filterCount = categoryCount + statusCount; // စုစုပေါင်း Filter = 5
+      const matchCount = matchFocusables.length;
+      
+      const isCategoryFilter = currentIndex < categoryCount;
+      const isStatusFilter = currentIndex >= categoryCount && currentIndex < filterCount;
+      const isMatchCard = currentIndex >= filterCount && currentIndex < filterCount + matchCount;
+      const isNav = currentIndex >= filterCount + matchCount;
 
       if (e.key === 'ArrowRight') {
-        if (currentIndex < allFocusables.length - 1) nextIndex = currentIndex + 1;
-        else shouldPreventDefault = false;
+        if (currentIndex < allFocusables.length - 1) {
+          nextIndex = currentIndex + 1;
+        } else {
+          shouldPreventDefault = false;
+        }
       } 
       else if (e.key === 'ArrowLeft') {
-        if (currentIndex > 0) nextIndex = currentIndex - 1;
-        else shouldPreventDefault = false;
+        if (currentIndex > 0) {
+          nextIndex = currentIndex - 1;
+        } else {
+          shouldPreventDefault = false;
+        }
       } 
-            else if (e.key === 'ArrowDown') {
-        const isMatchCard = currentIndex >= topSectionCount;
-        const isStatusFilter = currentIndex >= categoryCount && currentIndex < topSectionCount;
-        const isCategoryFilter = currentIndex < categoryCount;
-
-        if (isMatchCard) {
-          // Match Card ကနေ အောက်ဆက်မယ်
-          const matchCards = mainFocusables.slice(topSectionCount);
-          const currentCardIndex = currentIndex - topSectionCount;
-          const isLastRowInCards = currentCardIndex >= matchCards.length - gridColumns;
-          
-          if (isLastRowInCards) {
-            nextIndex = mainFocusables.length; // Bottom Nav
+      else if (e.key === 'ArrowDown') {
+        if (isCategoryFilter || isStatusFilter) {
+          // Filter (Category သို့မဟုတ် Status) ကနေ အောက်နှိပ်ရင် ပထမဆုံး Match Card ကို သွားမယ်
+          if (matchCount > 0) {
+            nextIndex = filterCount;
           } else {
-            const potentialNext = currentIndex + gridColumns;
-            if (potentialNext < allFocusables.length) nextIndex = potentialNext;
-            else shouldPreventDefault = false;
+            shouldPreventDefault = false;
           }
         } 
-        else if (isStatusFilter) {
-          // ✅ Status Filter (All, Live, Upcoming) ကနေ Down နှိပ်ရင် Match Card ကို တိုက်ရိုက်သွားမယ်
-          const statusIndex = currentIndex - categoryCount; // 0, 1, or 2
-          // ပထမဆုံး Match Card Row ကို သွားမယ်
-          // Status Filter ရဲ့ column position အရ ပထမဆုံး Match Card ကို ရွေးမယ်
-          nextIndex = topSectionCount + statusIndex;
+        else if (isMatchCard) {
+          // Match Card ကနေ အောက်ဆက်မယ်
+          const currentCardIndex = currentIndex - filterCount;
+          const isLastRow = currentCardIndex >= matchCount - gridColumns;
           
-          // အကယ်၍ Match Card မရှိရင် Bottom Nav ကို သွားမယ်
-          if (nextIndex >= allFocusables.length) {
-            nextIndex = mainFocusables.length;
+          if (isLastRow) {
+            if (navFocusables.length > 0) {
+              nextIndex = filterCount + matchCount;
+            } else {
+              shouldPreventDefault = false;
+            }
+          } else {
+            const potentialNext = currentCardIndex + gridColumns;
+            if (potentialNext < matchCount) {
+              nextIndex = filterCount + potentialNext;
+            } else {
+              shouldPreventDefault = false;
+            }
           }
         }
-        else if (isCategoryFilter) {
-          // Category Filter ကနေ Down နှိပ်ရင် Status Filter ကို သွားမယ်
-          nextIndex = categoryCount; // "All" button ကို သွားမယ်
+        else if (isNav) {
+          shouldPreventDefault = false;
         }
       }
       else if (e.key === 'ArrowUp') {
-        // ✅ ပြင်ဆင်ထားသော အပိုင်း
-        const isMatchCard = currentIndex >= topSectionCount;
-        const isStatusFilter = currentIndex >= categoryCount && currentIndex < topSectionCount;
-        const isCategoryFilter = currentIndex < categoryCount;
-
-        if (isMatchCard) {
-          // Match Card ကနေ အပေါ်တက်မယ်
-          const matchCards = mainFocusables.slice(topSectionCount);
-          const currentCardIndex = currentIndex - topSectionCount;
-          
-          if (currentCardIndex - gridColumns >= 0) {
-            nextIndex = currentIndex - gridColumns;
+        if (isNav) {
+          // Bottom Nav ကနေ အပေါ်တက်ရင် နောက်ဆုံး Match Card ကို သွားမယ်
+          if (matchCount > 0) {
+            nextIndex = filterCount + matchCount - 1;
+          } else if (filterCount > 0) {
+            nextIndex = filterCount - 1;
           } else {
-            // Match Card ရဲ့ ပထမ Row ကနေ အပေါ်တက်ရင် Status Filter ကို သွားမယ်
-            // ဘယ် Match Card column မှာ ရောက်နေလဲဆိုတာ ကြည့်မယ်
-            const colIndex = currentCardIndex % gridColumns;
-            // Status Filter ရဲ့ အလယ်ဗဟို (Index 3 - Live) ကို သွားမယ် (သို့မဟုတ်) နီးစပ်ရာ
-            nextIndex = categoryCount + Math.min(colIndex, statusCount - 1);
+            shouldPreventDefault = false;
           }
         } 
+        else if (isMatchCard) {
+          // Match Card ကနေ အပေါ်တက်မယ်
+          const currentCardIndex = currentIndex - filterCount;
+          
+          if (currentCardIndex < gridColumns) {
+            // ပထမ Row မှာ ရှိနေရင် Status Filter ကို သွားမယ်
+            if (statusCount > 0) {
+              const colIndex = currentCardIndex % gridColumns;
+              // Status Filter (Index 2, 3, 4) ထဲက နီးစပ်ရာကို သွားမယ်
+              nextIndex = categoryCount + Math.min(colIndex, statusCount - 1);
+            } else {
+              shouldPreventDefault = false;
+            }
+          } else {
+            // အပေါ်က Row ကို သွားမယ်
+            const potentialPrev = currentCardIndex - gridColumns;
+            if (potentialPrev >= 0) {
+              nextIndex = filterCount + potentialPrev;
+            } else {
+              shouldPreventDefault = false;
+            }
+          }
+        }
         else if (isStatusFilter) {
-          // Status Filter (All, Live, Upcoming) ကနေ အပေါ်တက်ရင် Category Filter ကို သွားမယ်
+          // ✅ Status Filter ကနေ အပေါ်တက်ရင် Category Filter ကို သွားမယ်
           const statusIndex = currentIndex - categoryCount; // 0, 1, or 2
           
           if (statusIndex === 0) {
-            // "All" (ပထမဆုံး) ကနေ အပေါ်တက်ရင် -> VN Server (Index 0)
-            nextIndex = 0;
+            nextIndex = 0; // "All" ကနေ အပေါ် -> VN Server
           } else if (statusIndex === 1) {
-            // "Live" (ဒုတိယ) ကနေ အပေါ်တက်ရင် -> VN Server (Index 0) သို့မဟုတ် မြန်မာအသံ (Index 1)
-            nextIndex = 0; // VN Server ကို းစားပေး
+            nextIndex = 0; // "Live" ကနေ အပေါ် -> VN Server
           } else {
-            // "Upcoming" (တတိယ) ကနေ အပေါ်တက်ရင် -> မြန်မာအသံ (Index 1)
-            nextIndex = 1;
+            nextIndex = 1; // "Upcoming" ကနေ အပေါ် -> Myanmar Sound
           }
         } 
         else if (isCategoryFilter) {
-          // Category Filter ကနေ အပေါ်တက်ရင် မသွားဘူး (သို့မဟုတ်) ပထမဆုံးကိုပဲ ထားမယ်
+          // ✅ Category Filter ကနေ အပေါ်တက်ရင် မသွားဘူး
           shouldPreventDefault = false;
         }
       } 
@@ -150,7 +184,7 @@ function App() {
         return;
       }
 
-      if (shouldPreventDefault) {
+      if (shouldPreventDefault && nextIndex >= 0 && nextIndex < allFocusables.length) {
         e.preventDefault();
         allFocusables[nextIndex].focus();
         allFocusables[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
@@ -172,26 +206,7 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedMatch, selectedCategory, selectedStatus, matches.length]);
 
-  // 🎯 ၂။ ✅ Back Button (History) Navigation Logic (ဒါက မင်းလိုချင်တဲ့ Flow အတိုင်း အလုပ်လုပ်ပါလိမ့်မယ်)
-  useEffect(() => {
-    const handlePopState = (event) => {
-      const state = event.state;
-      
-      if (state?.page === 'links') {
-        // Video Player ကိုပိတ်ပြီး Link ရွေးတဲ့အဆင့်ကို ပြန်ရောက်မယ်
-        setActiveLink(null);
-      } else {
-        // Link ရွေးတဲ့အဆင့်ကနေ ထပ်ထွက်ရင် Homepage ကို ပြန်ရောက်မယ်
-        setSelectedMatch(null);
-        setActiveLink(null);
-      }
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  // 🎯 ၃။ Data Fetching Logic
+  // 🎯 ၂။ Data Fetching Logic
   useEffect(() => {
     const fetchData = async (isBackground = false) => {
       if (!isBackground) setLoading(true);
@@ -253,20 +268,43 @@ function App() {
     return () => clearInterval(interval);
   }, [selectedCategory]);
 
-  // 🎯 ၄။ Click Handlers
+  // 🎯 ၃။ Click Handlers
   const handleMatchClick = (match) => {
     setSelectedMatch(match);
-    window.history.pushState({ page: 'links' }, '');
+    lastFocusedMatchId.current = match.id;
+    window.history.pushState({ page: 'modal' }, '');
   };
 
   const handleLinkClick = (link) => {
     setActiveLink(link);
-    window.history.pushState({ page: 'video' }, '');
   };
 
   const handleClosePlayer = () => {
-    window.history.back();
+    setSelectedMatch(null);
+    setActiveLink(null);
+    
+    setTimeout(() => {
+      if (lastFocusedMatchId.current) {
+        const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
+        if (matchCard) {
+          matchCard.focus();
+          matchCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }, 100);
   };
+
+  // 🎯 ၄။ Browser/Mobile Back Button Listener
+  useEffect(() => {
+    const handlePopState = () => {
+      if (selectedMatch) {
+        handleClosePlayer();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedMatch]);
 
   const filteredMatches = matches.filter(match => {
     if (selectedStatus === 'live') return match.matchStatus === true;
@@ -277,7 +315,8 @@ function App() {
   return (
     <div className="app">
       <Header />
-      <main className="main-content">
+      
+      <div className="filters-wrapper">
         <CategoryFilter 
           categories={[
             { id: 'vnserver', name: 'VN Server', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw8MDnWAjN3smohKgCiVaFj-NXNVRk1BgTY_6g6SVQIQ&s=10', count: categoryCounts.vnserver, isImage: true },
@@ -292,7 +331,9 @@ function App() {
           selected={selectedStatus} 
           onSelect={setSelectedStatus} 
         />
-
+      </div>
+      
+      <main className="main-content">
         {loading ? (
           <div className="loading"><div className="spinner"></div><p>Loading matches...</p></div>
         ) : filteredMatches.length === 0 ? (

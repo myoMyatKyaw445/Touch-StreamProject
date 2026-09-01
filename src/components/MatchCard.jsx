@@ -6,6 +6,7 @@ export default function MatchCard({ match, category, onClick }) {
       className="match-card focusable-item" 
       onClick={() => onClick(match)}
       tabIndex={0}
+      data-match-id={match.id} // ✅ ဒီလို တစ်ကြောင်း ထပ်ထည့်ပေးလိုက်ပါ
       role="button"
     >
       <div className="timer-badge">{myanmarTime}</div>
