@@ -2,12 +2,15 @@ import { useEffect } from 'react';
 import { openExternalPlayer } from '../utils/openExternalPlayer';
 import './VideoPlayer.css';
 
-export default function VideoPlayer({ match, onClose }) {
+export default function VideoPlayer({ match, onLinkClick, onClose }) {
   const { homeTeam, awayTeam, league, myanmarTime, links } = match;
 
-  const handleStreamClick = (url) => {
-    openExternalPlayer(url);
-    onClose();
+    const handleStreamClick = (link) => {
+    openExternalPlayer(link.url);
+    // Modal ကို ချက်ချင်းမပိတ်ဘဲ Parent ကို အသိပေးမယ်
+    if (onLinkClick) {
+      onLinkClick(link);
+    }
   };
 
   // Link name ကို တိုအောင် ဖြတ်ပေးမည့် function
@@ -126,7 +129,7 @@ export default function VideoPlayer({ match, onClose }) {
                 <button
                   key={index}
                   className="link-card focusable-item"
-                  onClick={() => handleStreamClick(link.url)}
+                    onClick={() => handleStreamClick(link)}
                   tabIndex={0}
                 >
                   <div className="link-icon">📺</div>

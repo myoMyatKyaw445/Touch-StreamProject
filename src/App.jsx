@@ -268,21 +268,28 @@ function App() {
     return () => clearInterval(interval);
   }, [selectedCategory]);
 
-  // 🎯 ၃။ Click Handlers
+      // 🎯 ၃။ Click Handlers (Step အလိုက် တိတိကျကျ ထိန်းချုပ်ထားသည်)
   const handleMatchClick = (match) => {
     setSelectedMatch(match);
     lastFocusedMatchId.current = match.id;
-    window.history.pushState({ page: 'modal' }, '');
+    // Step 1: Modal ဖွင့်လိုက်ပြီ
+    window.history.pushState({ step: 1 }, '');
   };
 
   const handleLinkClick = (link) => {
     setActiveLink(link);
+    
   };
 
-  const handleClosePlayer = () => {
+      const handleClosePlayer = () => {
+    // ၁။ UI State ကို ချက်ချင်းရှင်းမယ်
     setSelectedMatch(null);
     setActiveLink(null);
     
+    // ၂။ History ကို ၁ ဆင့်တည်း ပြန်ဆုတ်မယ် (Step 1 ကနေ Homepage ကို တန်းသွားမယ်)
+    window.history.back(); 
+    
+    // ၃။ MatchCard ကို Focus ပြန်ပေးမယ်
     setTimeout(() => {
       if (lastFocusedMatchId.current) {
         const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
@@ -294,18 +301,35 @@ function App() {
     }, 100);
   };
 
-  // 🎯 ၄။ Browser/Mobile Back Button Listener
+        // 🎯 ၄။ Browser/Mobile Back Button Listener (၁ ချက်တည်းနဲ့ ပိတ်အောင် ပြင်ဆင်ထားသည်)
   useEffect(() => {
-    const handlePopState = () => {
-      if (selectedMatch) {
-        handleClosePlayer();
-      }
+    const handlePopState = (event) => {
+      const state = event.state;
+      
+      // ✅ Homepage (Root) ကို ရောက်သွားပြီလား စစ်ဆေးခြင်း
+      const isRoot = !state || state.step === undefined || state.step === null;
+
+      if (isRoot) {
+        // Homepage ကို ရောက်ပြီဆိုရင် Modal ကို အပြီးတိုင်ပိတ်မယ်
+        setSelectedMatch(null);
+        setActiveLink(null);
+        
+        setTimeout(() => {
+          if (lastFocusedMatchId.current) {
+            const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
+            if (matchCard) {
+              matchCard.focus();
+              matchCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        }, 100);
+      } 
+      // ✅ Step 1 (Modal) မှာ ရှိနေသေးရင် ဘာမှမလုပ်ဘူး (Modal ဆက်ဖွင့်ထားမယ်)
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedMatch]);
-
+  }, []); 
   const filteredMatches = matches.filter(match => {
     if (selectedStatus === 'live') return match.matchStatus === true;
     if (selectedStatus === 'upcoming') return match.matchStatus === false;
