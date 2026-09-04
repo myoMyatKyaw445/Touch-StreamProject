@@ -295,7 +295,7 @@ function App() {
         const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
         if (matchCard) {
           matchCard.focus();
-          matchCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          matchCard.scrollIntoView({ behavior: 'auto', block: 'center' });
         }
       }
     }, 100);
@@ -319,7 +319,7 @@ function App() {
             const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
             if (matchCard) {
               matchCard.focus();
-              matchCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              matchCard.scrollIntoView({ behavior: 'auto', block: 'center' });
             }
           }
         }, 100);

@@ -153,7 +153,7 @@ body {
   align-items: center;
   justify-content: center;
   border: 2px solid transparent;
-  transition: all 0.3s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .category-btn.active .category-icon {
@@ -205,7 +205,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.3s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -235,7 +235,7 @@ body {
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
   width: 100%;
 }
@@ -389,7 +389,7 @@ body {
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   padding: 5px 15px;
-  transition: all 0.3s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .nav-item.active {
@@ -765,7 +765,7 @@ body {
   /* ၁။ Focusable Item အားလုံးကို Relative ထားမယ် */
   .focusable-item {
     position: relative;
-    transition: all 0.2s ease;
+    transition: all 0.2s ease;transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   /* ၂။ Focus ရောက်တဲ့အခါ အခြေခံ Effect */
@@ -845,4 +845,33 @@ body {
     background: rgba(255, 255, 255, 0.1) !important;
     border-color: transparent !important;
   }
+}
+
+/* ========================================== */
+/* TV BOX / ANDROID WEBVIEW FOCUS FIX */
+/* ========================================== */
+
+/* ၁။ အဝါရောင် Default Outline ကို အတင်းပိတ်မယ် */
+.focusable-item:focus,
+.focusable-item:active {
+  outline: 0 !important;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ၂။ TV Box မှာ box-shadow က ::before ထက် ပိုအလုပ်လုပ်ပါတယ် */
+.match-card.focusable-item:focus {
+  outline: 0 !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3) inset, 0 0 15px rgba(255, 255, 255, 0.2) !important;
+}
+
+.category-btn.focusable-item:focus .category-icon {
+  outline: 0 !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5) !important;
+}
+
+.status-btn.focusable-item:focus {
+  outline: 0 !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5) !important;
 }
