@@ -37,7 +37,7 @@ body {
 /* Header - Full Width */
 .app-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 10px 15px; /* 15px 20px အစား 10px 15px */
+  padding: 10px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -64,7 +64,7 @@ body {
 }
 
 .app-title {
-  font-size: 1.3rem; /* 1.5rem အစား 1.3rem */
+  font-size: 1.3rem;
   font-weight: 700;
   color: #fff;
 }
@@ -99,16 +99,16 @@ body {
 
 .filters-wrapper {
   position: sticky;
-  top: 55px; /* 65px အစား 55px */
+  top: 55px;
   z-index: 90;
   background: linear-gradient(180deg, #0f0c29 0%, #302b63 100%);
   backdrop-filter: blur(10px);
-  padding: 8px 15px; /* 10px 15px အစား 8px 15px */
+  padding: 8px 15px;
   margin-bottom: 0;
 }
 
 .filters-wrapper .category-filter {
-  margin-bottom: 8px; /* 10px အစား 8px */
+  margin-bottom: 8px;
 }
 
 .filters-wrapper .status-filter {
@@ -118,10 +118,10 @@ body {
 /* Category Filter */
 .category-filter {
   display: flex;
-  gap: 12px; /* 15px အစား 12px */
-  margin-bottom: 15px; /* 20px အစား 15px */
+  gap: 12px;
+  margin-bottom: 15px;
   overflow-x: auto;
-  padding: 8px 0; /* 10px 0 အစား 8px 0 */
+  padding: 8px 0;
   width: 100%;
 }
 
@@ -138,7 +138,7 @@ body {
 
 .category-icon {
   position: relative;
-  width: 50px; /* 60px အစား 50px */
+  width: 50px;
   height: 50px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
@@ -155,7 +155,7 @@ body {
 }
 
 .icon {
-  font-size: 1.5rem; /* 1.8rem အစား 1.5rem */
+  font-size: 1.5rem;
 }
 
 .badge {
@@ -181,10 +181,10 @@ body {
 /* Status Filter */
 .status-filter {
   display: flex;
-  gap: 8px; /* 10px အစား 8px */
-  margin-bottom: 15px; /* 20px အစား 15px */
+  gap: 8px;
+  margin-bottom: 15px;
   overflow-x: auto;
-  padding: 8px 0; /* 10px 0 အစား 8px 0 */
+  padding: 8px 0;
   width: 100%;
 }
 
@@ -267,7 +267,7 @@ body {
   gap: 4px;
   flex: 1;
   min-width: 0;
-  overflow: hidden; /* overflow ထည့်ပါ */
+  overflow: hidden;
 }
 
 .team-logo-wrapper {
@@ -305,9 +305,9 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  flex-wrap: nowrap; /* wrap မဖြစ်အောင် */
+  flex-wrap: nowrap;
   width: 100%;
-  white-space: nowrap; /* စာသားတွေကို တစ်ကြောင်းတည်းထားမယ် */
+  white-space: nowrap;
 }
 
 .team-name {
@@ -316,15 +316,15 @@ body {
   text-align: center;
   color: #fff;
   word-break: break-word;
-  max-width: none; /* max-width ကို ဖျက်မယ် */
-  overflow: visible; /* overflow ကို ပြင်မယ် */
+  max-width: none;
+  overflow: visible;
   text-overflow: clip;
-  display: block; /* -webkit-box ကို ဖျက်မယ် */
+  display: block;
   -webkit-line-clamp: unset;
   -webkit-box-orient: unset;
   line-height: 1.2;
   min-height: auto;
-  flex-shrink: 1; /* name ကို ကျုံ့ခွင့်ပေးမယ် */
+  flex-shrink: 1;
 }
 
 .vs-section {
@@ -402,7 +402,7 @@ body {
   min-width: auto;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0; /* score ကို မကျုံ့စေရ */
+  flex-shrink: 0;
 }
 
 /* Bottom Navigation */
@@ -504,9 +504,9 @@ body {
 
 @media (min-width: 768px) {
   .matches-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 15px;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: 15px !important;
   }
   
   .match-card {
@@ -522,13 +522,14 @@ body {
   }
   
   .teams-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  gap: 8px;
-  flex-wrap: nowrap; /* wrap မဖြစ်အောင် */
-}
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 8px;
+    flex-wrap: nowrap;
+    flex: 1;
+  }
   
   .team-logo {
     width: 35px;
@@ -612,8 +613,8 @@ body {
 
 @media (min-width: 1024px) {
   .matches-list {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 18px !important;
   }
   
   .match-card {
@@ -703,8 +704,8 @@ body {
   }
   
   .matches-list {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
   }
   
   .match-card {
@@ -881,53 +882,4 @@ body {
 .status-btn.focusable-item:focus {
   outline: 0 !important;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5) !important;
-}
-
-/* ========================================== */
-/* ANDROID TV FIX - Force Grid Layout */
-/* ========================================== */
-
-/* TV Screen (1280px ဲ့ အထက်) မှာ Grid Layout ကို အတင်းသုံးမယ် */
-@media (min-width: 1280px) {
-  .matches-list {
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 18px !important;
-  }
-  
-  .match-card {
-    min-height: 220px !important;
-  }
-  
-  .teams-section {
-    padding: 18px 12px !important;
-  }
-  
-  .team-logo {
-    width: 40px !important;
-    height: 40px !important;
-  }
-  
-  .team-logo-wrapper {
-    width: 40px !important;
-    height: 40px !important;
-  }
-  
-  .team-name {
-    font-size: 0.9rem !important;
-  }
-  
-  .timer-badge {
-    font-size: 0.9rem !important;
-    padding: 10px !important;
-  }
-  
-  .league-section {
-    padding: 12px 15px !important;
-    min-height: 50px !important;
-  }
-  
-  .league-name {
-    font-size: 0.9rem !important;
-  }
 }
