@@ -37,7 +37,7 @@ body {
 /* Header - Full Width */
 .app-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 15px 20px;
+  padding: 10px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -64,7 +64,7 @@ body {
 }
 
 .app-title {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #fff;
 }
@@ -88,47 +88,40 @@ body {
   transform: scale(1.1);
 }
 
-/* Main Content - Full Width */
+/* Main Content */
 .main-content {
   flex: 1;
   padding: 15px;
-  padding-bottom: 100px; /* ✅ Bottom Nav အတွက် နေရာလွတ် ချန်ထားမယ် */
+  padding-bottom: 100px;
   overflow-y: auto;
   width: 100%;
 }
+
 .filters-wrapper {
   position: sticky;
-  top: 65px; /* Header အောက်မှာ ကပ်နေအောင် */
-  z-index: 90; /* Header (100) အောက်၊ Match Cards အပေါ်မှာ */
+  top: 55px;
+  z-index: 90;
   background: linear-gradient(180deg, #0f0c29 0%, #302b63 100%);
   backdrop-filter: blur(10px);
-  padding: 10px 15px;
+  padding: 8px 15px;
   margin-bottom: 0;
 }
 
 .filters-wrapper .category-filter {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .filters-wrapper .status-filter {
   margin-bottom: 0;
 }
 
-/* Main Content - Full Width */
-.main-content {
-  flex: 1;
-  padding: 15px;
-  padding-bottom: 100px;
-  overflow-y: auto; /* ✅ Match Cards တွေပဲ Scroll ဖြစ်အောင် */
-  width: 100%;
-}
 /* Category Filter */
 .category-filter {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 15px;
   overflow-x: auto;
-  padding: 10px 0;
+  padding: 8px 0;
   width: 100%;
 }
 
@@ -145,8 +138,8 @@ body {
 
 .category-icon {
   position: relative;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   display: flex;
@@ -162,7 +155,7 @@ body {
 }
 
 .icon {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
 }
 
 .badge {
@@ -188,20 +181,20 @@ body {
 /* Status Filter */
 .status-filter {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 15px;
   overflow-x: auto;
-  padding: 10px 0;
+  padding: 8px 0;
   width: 100%;
 }
 
 .status-btn {
-  padding: 10px 20px;
+  padding: 8px 16px;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid transparent;
-  border-radius: 25px;
+  border-radius: 20px;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -220,19 +213,19 @@ body {
   font-size: 1rem;
 }
 
-/* Match Cards - Mobile (Default - Vertical List) */
+/* ========================================== */
+/* MATCH CARDS - MOBILE (GoSports Style) */
+/* ========================================== */
+
 .matches-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  padding-bottom: 20px; /* ✅ နောက်ဆုံး Row အတွက် အပိုနေရာ */
+  gap: 10px;
 }
-
 
 .match-card {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -250,8 +243,8 @@ body {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #fff;
   text-align: center;
-  padding: 8px;
-  font-size: 0.85rem;
+  padding: 6px;
+  font-size: 0.75rem;
   font-weight: 700;
   font-family: monospace;
   width: 100%;
@@ -261,34 +254,37 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  gap: 10px;
+  padding: 10px 12px;
+  gap: 8px;
 }
 
 .team {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .team-logo-wrapper {
   position: relative;
-  width: 45px;
-  height: 45px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .team-logo {
-  width: 45px;
-  height: 45px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
-  padding: 5px;
+  padding: 2px;
 }
 
 .team-logo-fallback {
@@ -298,26 +294,47 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 1.5rem;
+}
+
+/* Team Info - Name နဲ့ Score ကို ဘေးတိုက်ပြဖို့ */
+.team-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  width: 100%;
+  white-space: nowrap;
 }
 
 .team-name {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-align: center;
   color: #fff;
   word-break: break-word;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  line-height: 1.2;
+  min-height: auto;
+  flex-shrink: 1;
 }
 
 .vs-section {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10px;
+  padding: 0 8px;
+  flex-shrink: 0;
 }
 
 .vs-text {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #667eea;
 }
@@ -326,7 +343,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 15px;
+  padding: 8px 12px;
   background: rgba(0, 0, 0, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -334,34 +351,56 @@ body {
 .league-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
 }
 
 .league-logo {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .league-name {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .live-badge {
   background: #ff4757;
   color: #fff;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   animation: pulse 2s infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
+}
+
+/* Team Score Styling */
+.team-score {
+  background-color: #ef4444;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.7rem;
+  min-width: auto;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 /* Bottom Navigation */
@@ -457,43 +496,23 @@ body {
   filter: brightness(1.2);
 }
 
-/* Team Score Styling */
-.team-score {
-  background-color: #ef4444;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 15px;
-  min-width: 30px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 /* ========================================== */
 /* DESKTOP & TABLET STYLES (768px and above) */
 /* ========================================== */
 
 @media (min-width: 768px) {
   .matches-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 15px;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 15px !important;
   }
 }
-  
-  /* Grid Layout */
-  .matches-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 15px;
-  }
   
   .match-card {
     height: 100%;
     min-height: 200px;
     display: flex;
-    flex-direction: column; /* Flexbox သုံးပြီး League section ကို အောက်ဆုံးတွန်းမယ် */
+    flex-direction: column;
   }
   
   .match-card:hover {
@@ -502,28 +521,39 @@ body {
   }
   
   .teams-section {
-    flex: 1; /* Teams section က ကျန်တဲ့ နေရာကို ယူမယ် */
-    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 8px;
+    flex-wrap: nowrap;
+    flex: 1;
   }
   
   .team-logo {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
   }
   
   .team-logo-wrapper {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
   }
   
   .team-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-align: center;
     word-break: break-word;
     white-space: normal;
     max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     line-height: 1.2;
+    min-height: auto;
   }
   
   .vs-text {
@@ -535,7 +565,6 @@ body {
     padding: 8px;
   }
   
-  /* ✅ League Section ကို ပုံစံကျအောင် ပြင်ဆင်ခြင်း */
   .league-section {
     display: flex;
     justify-content: space-between;
@@ -543,25 +572,24 @@ body {
     padding: 12px 15px;
     background: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
-    min-height: 48px; /* အနည်းဆုံး အမြင့် သတ်မှတ်မယ် */
-    margin-top: auto; /* အောက်ဆုံးကို တွန်းမယ် */
+    min-height: 48px;
+    margin-top: auto;
   }
   
   .league-info {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 1; /* ကျန်တဲ့ နေရာကို ယူမယ် */
-    min-width: 0; /* Text truncation အတွက် */
+    flex: 1;
+    min-width: 0;
   }
   
-  /* ✅ League Name ကို 1 Line ပဲ ပြပြီး ပိုလျှင်ရင် "..." ဖြတ်မယ် */
   .league-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.7);
-    white-space: nowrap; /* 1 line ပဲ ပြမယ် */
-    overflow: hidden; /* ပိုလျှင်တာ ဖျောက်မယ် */
-    text-overflow: ellipsis; /* "..." ပြမယ် */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     max-width: 100%;
   }
   
@@ -574,9 +602,9 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     animation: pulse 2s infinite;
-    flex-shrink: 0; /* Badge ကို မကျုံ့စေရ */
+    flex-shrink: 0;
   }
-
+}
 
 /* ========================================== */
 /* ANDROID TV & LARGE DESKTOP (1024px+) */
@@ -584,18 +612,13 @@ body {
 
 @media (min-width: 1024px) {
   .matches-list {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 18px !important;
   }
-  
-  /* 4 Columns Grid */
-  .matches-list {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-  }
+}
+
   
   .match-card {
-    min-height: 220px;
     border-radius: 12px;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.08);
@@ -619,13 +642,14 @@ body {
   }
   
   .team-logo {
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
+    padding: 3px;
   }
   
   .team-logo-wrapper {
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
   }
   
   .team-name {
@@ -655,7 +679,6 @@ body {
     background-clip: text;
   }
   
-  /* ✅ TV အတွက် League Section ပိုကောင်းအောင် */
   .league-section {
     padding: 12px 15px;
     min-height: 50px;
@@ -675,6 +698,7 @@ body {
 /* EXTRA LARGE SCREENS (TV 4K - 1440px+) */
 /* ========================================== */
 
+
 @media (min-width: 1440px) {
   .main-content {
     padding: 30px;
@@ -682,8 +706,8 @@ body {
   }
   
   .matches-list {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
   }
   
   .match-card {
@@ -691,13 +715,13 @@ body {
   }
   
   .team-logo {
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
   }
   
   .team-logo-wrapper {
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
   }
   
   .team-name {
@@ -712,7 +736,13 @@ body {
     font-size: 0.95rem;
   }
 }
-
+/* Large Desktop / Laptop Only (1600px and above) -> ၅ ခု */
+@media (min-width: 1600px) {
+  .matches-list {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 20px !important;
+  }
+}
 /* Mobile Responsive Adjustments */
 @media (max-width: 480px) {
   .app-title {
@@ -729,21 +759,21 @@ body {
   }
   
   .team-logo {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
   }
   
   .team-logo-wrapper {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
   }
   
   .team-name {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
   
   .vs-text {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
   
   .status-btn {
@@ -752,51 +782,45 @@ body {
   }
   
   .timer-badge {
-    font-size: 0.75rem;
-    padding: 6px;
+    font-size: 0.7rem;
+    padding: 5px;
+  }
+  
+  .league-name {
+    font-size: 0.7rem;
   }
 }
 
 /* ========================================== */
-/* TV / DESKTOP KEYBOARD NAVIGATION FOCUS (Fixed) */
+/* TV / DESKTOP KEYBOARD NAVIGATION FOCUS */
 /* ========================================== */
 
 @media (min-width: 768px) {
-  /* ၁။ Focusable Item အားလုံးကို Relative ထားမယ် */
   .focusable-item {
     position: relative;
-    transition: all 0.2s ease;transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  /* ၂။ Focus ရောက်တဲ့အခါ အခြေခံ Effect */
   .focusable-item:focus {
-    outline: none !important; /* လေးထောင့်ကြီး (Outline) ကို ဖျက်ပစ်မယ် */
+    outline: none !important;
     transform: scale(1.03);
     z-index: 20;
   }
 
-  /* ========================================== */
-  /* ၃။ Category Button (စက်ဝိုင်းပုံစံ) အတွက် */
-  /* ========================================== */
   .category-btn.focusable-item:focus {
     outline: none !important;
   }
   
-  /* စက်ဝိုင်း Icon အတွက် အဖြူအကြည် Background */
   .category-btn.focusable-item:focus .category-icon {
     background: rgba(255, 255, 255, 0.25) !important;
     border-color: rgba(255, 255, 255, 0.4) !important;
   }
 
-  /* ========================================== */
-  /* ၄။ Match Card (လေးထောင့်) အတွက် */
-  /* ========================================== */
   .match-card.focusable-item:focus {
     outline: none !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
   }
   
-  /* Match Card အတွင်းမှာပဲ အဖြူအကြည် Overlay */
   .match-card.focusable-item:focus::before {
     content: '';
     position: absolute;
@@ -807,21 +831,15 @@ body {
     background: rgba(255, 255, 255, 0.12);
     pointer-events: none;
     z-index: 1;
-    border-radius: inherit; /* Card ရဲ့ ထောင့်ချိုးအတိုင်း လိုက်ဖြစ်မယ် */
+    border-radius: inherit;
   }
 
-  /* ========================================== */
-  /* ၅။ Status Button (အဝိုင်းထောင့်) အတွက် */
-  /* ========================================== */
   .status-btn.focusable-item:focus {
     outline: none !important;
     background: rgba(255, 255, 255, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
   }
 
-  /* ========================================== */
-  /* ၆။ Bottom Nav Item အတွက် */
-  /* ========================================== */
   .nav-item.focusable-item:focus {
     outline: none !important;
     background: rgba(255, 255, 255, 0.15) !important;
@@ -829,7 +847,7 @@ body {
   }
 }
 
-/* Mobile မှာ Focus Effect ကို လုံးဝ ပိတ်ထားမယ် */
+/* Mobile Focus Effect Off */
 @media (max-width: 767px) {
   .focusable-item:focus {
     outline: none !important;
@@ -851,7 +869,6 @@ body {
 /* TV BOX / ANDROID WEBVIEW FOCUS FIX */
 /* ========================================== */
 
-/* ၁။ အဝါရောင် Default Outline ကို အတင်းပိတ်မယ် */
 .focusable-item:focus,
 .focusable-item:active {
   outline: 0 !important;
@@ -859,7 +876,6 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ၂။ TV Box မှာ box-shadow က ::before ထက် ပိုအလုပ်လုပ်ပါတယ် */
 .match-card.focusable-item:focus {
   outline: 0 !important;
   border-color: rgba(255, 255, 255, 0.5) !important;
@@ -874,4 +890,30 @@ body {
 .status-btn.focusable-item:focus {
   outline: 0 !important;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ========================================== */
+/* FORCE GRID FOR ANDROID TV (Global Rule) */
+/* ========================================== */
+/* Android TV တွေက 768px အောက် (ဥပမာ 480px) လို့ ပြတတ်လို့ 
+   Media Query အပြင်ဘက်မှာ Global Rule အနေနဲ့ ထည့်ထားပါတယ် */
+
+.matches-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+  gap: 15px !important;
+}
+
+/* Mobile (480px အောက်) မှာတော့ List Layout ပြန်ဖြစ်အောင် */
+@media (max-width: 480px) {
+  .matches-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .match-card {
+    height: auto !important;
+    min-height: auto !important;
+  }
 }
