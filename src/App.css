@@ -882,3 +882,52 @@ body {
   outline: 0 !important;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5) !important;
 }
+
+/* ========================================== */
+/* ANDROID TV FIX - Force Grid Layout */
+/* ========================================== */
+
+/* TV Screen (1280px ဲ့ အထက်) မှာ Grid Layout ကို အတင်းသုံးမယ် */
+@media (min-width: 1280px) {
+  .matches-list {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 18px !important;
+  }
+  
+  .match-card {
+    min-height: 220px !important;
+  }
+  
+  .teams-section {
+    padding: 18px 12px !important;
+  }
+  
+  .team-logo {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .team-logo-wrapper {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .team-name {
+    font-size: 0.9rem !important;
+  }
+  
+  .timer-badge {
+    font-size: 0.9rem !important;
+    padding: 10px !important;
+  }
+  
+  .league-section {
+    padding: 12px 15px !important;
+    min-height: 50px !important;
+  }
+  
+  .league-name {
+    font-size: 0.9rem !important;
+  }
+}
