@@ -24,7 +24,8 @@ function App() {
 
   const hasInitialFocused = useRef(false);
   const lastFocusedMatchId = useRef(null);
-    // 🎯 Refresh လုပ်တိုင်း Scroll ကို အပေါ်ဆုံး (အစ) ကနေ ပြန်စအောင် လုပ်ဆောင်ခြင်း
+
+  // 🎯 Refresh လုပ်တိုင်း Scroll ကို အပေါ်ဆုံး (အစ) ကနေ ပြန်စအောင် လုပ်ဆောင်ခြင်း
   useEffect(() => {
     const mainContent = document.querySelector('.main-content');
     if (mainContent) {
@@ -36,6 +37,7 @@ function App() {
       window.history.scrollRestoration = 'manual';
     }
   }, []); // Component စတင်တဲ့အခါ တစ်ကြိမ်သာ Run မယ်
+
   // 🎯 ၁။ Keyboard Navigation Logic (Homepage အတွက် - အပြီးသတ် ပြင်ဆင်ထားသည်)
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -60,11 +62,25 @@ function App() {
       let nextIndex = currentIndex;
       let shouldPreventDefault = true;
       
-      // Grid Column တွက်ချက်ခြင်း
+      // ✅ Grid Column တွက်ချက်ခြင်း (Math-based 100% Accurate)
       let gridColumns = 1;
-      if (window.innerWidth >= 1024) gridColumns = 4;
-      else if (window.innerWidth >= 768) gridColumns = Math.floor(window.innerWidth / 260);
-      else gridColumns = 1;
+      const listContainer = document.querySelector('.matches-list');
+      const firstCard = document.querySelector('.matches-list .match-card');
+
+      if (listContainer && firstCard) {
+        const containerWidth = listContainer.offsetWidth;
+        const computedStyle = window.getComputedStyle(listContainer);
+        // Gap တန်ဖိုးကို ရယူခြင်း (ဥပမာ '18px' ဆိုရင် 18 ကို ပြန်ထုတ်ပေးမယ်)
+        const gap = parseFloat(computedStyle.gap) || parseFloat(computedStyle.columnGap) || 15;
+        const cardWidth = firstCard.offsetWidth;
+
+        // တစ်တန်းမှာ ဘယ်နှစ်ခုဆံ့လဲ တွက်ချက်ခြင်း
+        gridColumns = Math.floor((containerWidth + gap) / (cardWidth + gap));
+        
+        // Safety checks
+        if (gridColumns < 1) gridColumns = 1;
+        if (gridColumns > 6) gridColumns = 4; // TV အတွက် အများဆုံး ၄ ခု သို့မဟုတ် ၅ ခုသာ ခွင့်ပြုမယ်
+      }
 
       // ✅ Zone ခွဲခြားခြင်း (အတိအကျ ပြင်ဆင်ထားသည်)
       const categoryCount = 2; // VN Server, Myanmar Sound
@@ -268,7 +284,7 @@ function App() {
     return () => clearInterval(interval);
   }, [selectedCategory]);
 
-      // 🎯 ၃။ Click Handlers (Step အလိုက် တိတိကျကျ ထိန်းချုပ်ထားသည်)
+  // 🎯 ၃။ Click Handlers (Step အလိုက် တိတိကျကျ ထိန်းချုပ်ထားသည်)
   const handleMatchClick = (match) => {
     setSelectedMatch(match);
     lastFocusedMatchId.current = match.id;
@@ -278,10 +294,9 @@ function App() {
 
   const handleLinkClick = (link) => {
     setActiveLink(link);
-    
   };
 
-      const handleClosePlayer = () => {
+  const handleClosePlayer = () => {
     // ၁။ UI State ကို ချက်ချင်းရှင်းမယ်
     setSelectedMatch(null);
     setActiveLink(null);
@@ -301,7 +316,7 @@ function App() {
     }, 100);
   };
 
-        // 🎯 ၄။ Browser/Mobile Back Button Listener (၁ ချက်တည်းနဲ့ ပိတ်အောင် ပြင်ဆင်ထားသည်)
+  // 🎯 ၄။ Browser/Mobile Back Button Listener (၁ ချက်တည်းနဲ့ ပိတ်အောင် ပြင်ဆင်ထားသည်)
   useEffect(() => {
     const handlePopState = (event) => {
       const state = event.state;
@@ -330,6 +345,7 @@ function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []); 
+
   const filteredMatches = matches.filter(match => {
     if (selectedStatus === 'live') return match.matchStatus === true;
     if (selectedStatus === 'upcoming') return match.matchStatus === false;
