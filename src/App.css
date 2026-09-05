@@ -615,8 +615,6 @@ body {
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 18px !important;
   }
-}
-
   
   .match-card {
     border-radius: 12px;
@@ -698,7 +696,6 @@ body {
 /* EXTRA LARGE SCREENS (TV 4K - 1440px+) */
 /* ========================================== */
 
-
 @media (min-width: 1440px) {
   .main-content {
     padding: 30px;
@@ -736,13 +733,7 @@ body {
     font-size: 0.95rem;
   }
 }
-/* Large Desktop / Laptop Only (1600px and above) -> ၅ ခု */
-@media (min-width: 1600px) {
-  .matches-list {
-    grid-template-columns: repeat(5, 1fr) !important;
-    gap: 20px !important;
-  }
-}
+
 /* Mobile Responsive Adjustments */
 @media (max-width: 480px) {
   .app-title {
