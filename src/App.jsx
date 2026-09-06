@@ -33,7 +33,7 @@ function App() {
     }
   }, []);
 
-  // 🎯 ၁။ Keyboard Navigation Logic (Spatial Navigation - 100% Accurate)
+  // 🎯 ၁။ Keyboard Navigation Logic
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (window.innerWidth < 768 || selectedMatch) return;
@@ -80,28 +80,37 @@ function App() {
           else shouldPreventDefault = false;
         } 
         else if (isMatchCard) {
-          // ✅ SPATIAL NAVIGATION FOR DOWN (Screen ပေါ်က အနေအထားအတိုင်း အောက်က Card ကို ရှာမယ်)
           const currentCardIndex = currentIndex - filterCount;
           const currentCard = matchFocusables[currentCardIndex];
           const currentRect = currentCard.getBoundingClientRect();
           
           let bestMatch = -1;
           let minDistance = Infinity;
+          let nextRowTop = Infinity;
 
           for (let i = 0; i < matchFocusables.length; i++) {
             if (i === currentCardIndex) continue;
             const targetRect = matchFocusables[i].getBoundingClientRect();
-            
-            // Target card က Current card ရဲ့ အောက်ဘက်မှာ ရှိရမယ်
-            if (targetRect.top > currentRect.top + 20) { 
-              const currentCenter = currentRect.left + currentRect.width / 2;
-              const targetCenter = targetRect.left + targetRect.width / 2;
-              const distance = Math.abs(currentCenter - targetCenter);
+            if (targetRect.top > currentRect.bottom - 10) { 
+              if (targetRect.top < nextRowTop) {
+                nextRowTop = targetRect.top;
+              }
+            }
+          }
+
+          if (nextRowTop !== Infinity) {
+            const currentCenter = currentRect.left + currentRect.width / 2;
+            for (let i = 0; i < matchFocusables.length; i++) {
+              if (i === currentCardIndex) continue;
+              const targetRect = matchFocusables[i].getBoundingClientRect();
               
-              // ဘေးတိုက် အကွာအဝေး အနီးဆုံးကို ရွေးမယ်
-              if (distance < minDistance) {
-                minDistance = distance;
-                bestMatch = i;
+              if (Math.abs(targetRect.top - nextRowTop) < 15) {
+                const targetCenter = targetRect.left + targetRect.width / 2;
+                const distance = Math.abs(currentCenter - targetCenter);
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  bestMatch = i;
+                }
               }
             }
           }
@@ -109,7 +118,6 @@ function App() {
           if (bestMatch !== -1) {
             nextIndex = filterCount + bestMatch;
           } else {
-            // အောက်မှာ Card မရှိရင် Bottom Nav ကို သွားမယ်
             if (navFocusables.length > 0) nextIndex = filterCount + matchCount;
             else shouldPreventDefault = false;
           }
@@ -125,27 +133,37 @@ function App() {
           else shouldPreventDefault = false;
         } 
         else if (isMatchCard) {
-          // ✅ SPATIAL NAVIGATION FOR UP (Screen ပေါ်က အနေအထားအတိုင်း အပေါ်က Card ကို ရှာမယ်)
           const currentCardIndex = currentIndex - filterCount;
           const currentCard = matchFocusables[currentCardIndex];
           const currentRect = currentCard.getBoundingClientRect();
           
           let bestMatch = -1;
           let minDistance = Infinity;
+          let prevRowTop = -Infinity;
 
           for (let i = 0; i < matchFocusables.length; i++) {
             if (i === currentCardIndex) continue;
             const targetRect = matchFocusables[i].getBoundingClientRect();
-            
-            // Target card က Current card ရဲ့ အပေါ်ဘက်မှာ ရှိရမယ်
-            if (targetRect.top < currentRect.top - 20) { 
-              const currentCenter = currentRect.left + currentRect.width / 2;
-              const targetCenter = targetRect.left + targetRect.width / 2;
-              const distance = Math.abs(currentCenter - targetCenter);
+            if (targetRect.bottom < currentRect.top + 10) { 
+              if (targetRect.top > prevRowTop) {
+                prevRowTop = targetRect.top;
+              }
+            }
+          }
+
+          if (prevRowTop !== -Infinity) {
+            const currentCenter = currentRect.left + currentRect.width / 2;
+            for (let i = 0; i < matchFocusables.length; i++) {
+              if (i === currentCardIndex) continue;
+              const targetRect = matchFocusables[i].getBoundingClientRect();
               
-              if (distance < minDistance) {
-                minDistance = distance;
-                bestMatch = i;
+              if (Math.abs(targetRect.top - prevRowTop) < 15) {
+                const targetCenter = targetRect.left + targetRect.width / 2;
+                const distance = Math.abs(currentCenter - targetCenter);
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  bestMatch = i;
+                }
               }
             }
           }
@@ -153,10 +171,8 @@ function App() {
           if (bestMatch !== -1) {
             nextIndex = filterCount + bestMatch;
           } else {
-            // အပေါ်မှာ Card မရှိရင် Status Filter ကို သွားမယ်
             if (statusCount > 0) {
-              const currentCardIndex = currentIndex - filterCount;
-              const colIndex = currentCardIndex % 4; // Fallback column
+              const colIndex = currentCardIndex % 4; 
               nextIndex = categoryCount + Math.min(colIndex, statusCount - 1);
             } else {
               shouldPreventDefault = false;
@@ -324,6 +340,8 @@ function App() {
   return (
     <div className="app">
       <Header />
+      
+      {/* ✅ Filter တွေကို main-content အပြင်ဘက်မှာ ထားပါ */}
       <div className="filters-wrapper">
         <CategoryFilter 
           categories={[

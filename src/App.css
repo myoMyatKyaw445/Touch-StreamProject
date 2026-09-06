@@ -30,7 +30,7 @@ body {
   flex-direction: column;
   width: 100%;
   max-width: 100vw;
-  padding-bottom: 70px;
+  padding-bottom: 50px;
   margin: 0;
 }
 
@@ -41,12 +41,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
+  position: fixed; /* sticky အစား fixed သုံးမယ် */
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
   width: 100%;
+  height: 60px; /* Header အမြင့်ကို အတိအကျ သတ်မှတ်မယ် */
 }
+
 
 .header-left {
   display: flex;
@@ -92,19 +96,22 @@ body {
 .main-content {
   flex: 1;
   padding: 15px;
-  padding-bottom: 100px;
+  padding-top: 280px; /* Header (60px) + Filter (~180px) + Spacing (40px) */
+  padding-bottom: 70px;
   overflow-y: auto;
   width: 100%;
+  margin-top: 0;
 }
-
 .filters-wrapper {
-  position: sticky;
-  top: 55px;
-  z-index: 90;
+  position: fixed;
+  top: 60px; /* Header အမြင့် (60px) အောက်မှာ */
+  left: 0;
+  right: 0;
+  z-index: 99; /* Header (100) အောက် */
   background: linear-gradient(180deg, #0f0c29 0%, #302b63 100%);
   backdrop-filter: blur(10px);
-  padding: 8px 15px;
-  margin-bottom: 0;
+  padding: 10px 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .filters-wrapper .category-filter {
@@ -412,22 +419,25 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   justify-content: space-around;
-  padding: 10px 0;
+  padding: 8px 0; /* ✅ 6px 0 ကနေ 8px 0 */
   box-shadow: 0 -4px 20px rgba(102, 126, 234, 0.3);
   z-index: 100;
   width: 100%;
+  min-height: 55px; /* ✅ height: 50px အစား min-height: 55px */
+  align-items: center; /* ✅ အလယ်မှာ ညှိအောင် */
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  justify-content: center; /* ✅ အလယ်မှာ ှိအောင် */
+  gap: 2px; /* ✅ 3px ကနေ 2px */
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  padding: 5px 15px;
+  padding: 4px 10px; /* ✅ 3px 12px ကနေ 4px 10px */
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -436,12 +446,13 @@ body {
 }
 
 .nav-icon {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
 }
 
 .nav-label {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 600;
+  line-height: 1;
 }
 
 .loading,
@@ -621,6 +632,7 @@ body {
     overflow: hidden;
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid rgba(255, 255, 255, 0.15);
+    min-height: 180px; /* ✅ 220px ကနေ 180px ကို လျှော့ချ */
   }
   
   .match-card:hover {
@@ -630,28 +642,28 @@ body {
   }
   
   .timer-badge {
-    font-size: 0.9rem;
-    padding: 10px;
+    font-size: 0.75rem; /* ✅ 0.9rem ကနေ 0.75rem */
+    padding: 6px; /* ✅ 10px ကနေ 6px */
     font-weight: 700;
   }
   
   .teams-section {
-    padding: 18px 12px;
+    padding: 10px 10px; /* ✅ 18px 12px ကနေ 10px 10px */
   }
   
   .team-logo {
-    width: 40px;
-    height: 40px;
-    padding: 3px;
+    width: 32px; /* ✅ 40px ကနေ 32px */
+    height: 32px;
+    padding: 2px; /* ✅ 3px ကနေ 2px */
   }
   
   .team-logo-wrapper {
-    width: 40px;
-    height: 40px;
+    width: 32px; /* ✅ 40px ကနေ 32px */
+    height: 32px;
   }
   
   .team-name {
-    font-size: 0.9rem;
+    font-size: 0.75rem; /* ✅ 0.9rem ကနေ 0.75rem */
     font-weight: 600;
     text-align: center;
     word-break: break-word;
@@ -665,11 +677,11 @@ body {
   }
   
   .vs-section {
-    padding: 0 8px;
+    padding: 0 6px; /* ✅ 0 8px ကနေ 0 6px */
   }
   
   .vs-text {
-    font-size: 1.4rem;
+    font-size: 1.1rem; /* ✅ 1.4rem ကနေ 1.1rem */
     font-weight: 700;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
@@ -678,17 +690,17 @@ body {
   }
   
   .league-section {
-    padding: 12px 15px;
-    min-height: 50px;
+    padding: 8px 10px; /* ✅ 12px 15px ကနေ 8px 10px */
+    min-height: 40px; /* ✅ 50px ကနေ 40px */
   }
   
   .league-name {
-    font-size: 0.9rem;
+    font-size: 0.75rem; /* ✅ 0.9rem ကနေ 0.75rem */
   }
   
   .live-badge {
-    font-size: 0.75rem;
-    padding: 5px 10px;
+    font-size: 0.65rem; /* ✅ 0.75rem ကနေ 0.65rem */
+    padding: 3px 6px; /* ✅ 5px 10px ကနေ 3px 6px */
   }
 }
 
@@ -699,7 +711,12 @@ body {
 @media (min-width: 1440px) {
   .main-content {
     padding: 30px;
+    padding-top: 280px;
     max-width: 1600px;
+  }
+  
+  .filters-wrapper {
+    padding: 15px 30px !important;
   }
   
   .matches-list {
@@ -708,29 +725,29 @@ body {
   }
   
   .match-card {
-    min-height: 240px;
+    min-height: 190px; /* ✅ 240px ကနေ 190px */
   }
   
   .team-logo {
-    width: 45px;
-    height: 45px;
+    width: 35px; /* ✅ 45px ကနေ 35px */
+    height: 35px;
   }
   
   .team-logo-wrapper {
-    width: 45px;
-    height: 45px;
+    width: 35px;
+    height: 35px;
   }
   
   .team-name {
-    font-size: 1rem;
+    font-size: 0.8rem; /* ✅ 1rem ကနေ 0.8rem */
   }
   
   .league-section {
-    min-height: 55px;
+    min-height: 42px; /* ✅ 55px ကနေ 42px */
   }
   
   .league-name {
-    font-size: 0.95rem;
+    font-size: 0.8rem; /* ✅ 0.95rem ကနေ 0.8rem */
   }
 }
 
