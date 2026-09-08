@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/cli": "^7.6.9",
+    "@capacitor/core": "^8.5.1",
     "@vercel/blob": "^2.8.0",
     "artplayer": "^5.4.0",
     "hls.js": "^1.7.1",
