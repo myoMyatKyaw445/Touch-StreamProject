@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.touch_stream_project.twa",
+        "sha256_cert_fingerprints": ["87:67:8B:7C:3E:69:93:EE:69:94:20:30:AC:E9:D7:05:96:53:BE:15:BA:FD:55:05:F4:BD:9F:80:92:96:E4:FC"]
+      }
+    }]
