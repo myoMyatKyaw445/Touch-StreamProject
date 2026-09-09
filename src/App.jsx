@@ -9,9 +9,9 @@ import './App.css';
 
 function App() {
   const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [connectionError, setConnectionError] = useState(false); // ✅ အသစ်ထည့်ထားသည်
-  const [retryTrigger, setRetryTrigger] = useState(0); // ✅ Retry လုပ်ရန်
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
+  const [retryTrigger, setRetryTrigger] = useState(0);
   
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [activeLink, setActiveLink] = useState(null);
@@ -27,6 +27,7 @@ function App() {
 
   const hasInitialFocused = useRef(false);
   const lastFocusedMatchId = useRef(null);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     const mainContent = document.querySelector('.main-content');
@@ -36,7 +37,7 @@ function App() {
     }
   }, []);
 
-  // 🎯 ၁။ Keyboard Navigation Logic
+  //  ၁။ Keyboard Navigation Logic (မူလအတိုင်း)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (window.innerWidth < 768 || selectedMatch) return;
@@ -95,9 +96,7 @@ function App() {
             if (i === currentCardIndex) continue;
             const targetRect = matchFocusables[i].getBoundingClientRect();
             if (targetRect.top > currentRect.bottom - 10) { 
-              if (targetRect.top < nextRowTop) {
-                nextRowTop = targetRect.top;
-              }
+              if (targetRect.top < nextRowTop) nextRowTop = targetRect.top;
             }
           }
 
@@ -106,7 +105,6 @@ function App() {
             for (let i = 0; i < matchFocusables.length; i++) {
               if (i === currentCardIndex) continue;
               const targetRect = matchFocusables[i].getBoundingClientRect();
-              
               if (Math.abs(targetRect.top - nextRowTop) < 15) {
                 const targetCenter = targetRect.left + targetRect.width / 2;
                 const distance = Math.abs(currentCenter - targetCenter);
@@ -118,16 +116,11 @@ function App() {
             }
           }
 
-          if (bestMatch !== -1) {
-            nextIndex = filterCount + bestMatch;
-          } else {
-            if (navFocusables.length > 0) nextIndex = filterCount + matchCount;
-            else shouldPreventDefault = false;
-          }
+          if (bestMatch !== -1) nextIndex = filterCount + bestMatch;
+          else if (navFocusables.length > 0) nextIndex = filterCount + matchCount;
+          else shouldPreventDefault = false;
         }
-        else if (isNav) {
-          shouldPreventDefault = false;
-        }
+        else if (isNav) shouldPreventDefault = false;
       }
       else if (e.key === 'ArrowUp') {
         if (isNav) {
@@ -148,9 +141,7 @@ function App() {
             if (i === currentCardIndex) continue;
             const targetRect = matchFocusables[i].getBoundingClientRect();
             if (targetRect.bottom < currentRect.top + 10) { 
-              if (targetRect.top > prevRowTop) {
-                prevRowTop = targetRect.top;
-              }
+              if (targetRect.top > prevRowTop) prevRowTop = targetRect.top;
             }
           }
 
@@ -159,7 +150,6 @@ function App() {
             for (let i = 0; i < matchFocusables.length; i++) {
               if (i === currentCardIndex) continue;
               const targetRect = matchFocusables[i].getBoundingClientRect();
-              
               if (Math.abs(targetRect.top - prevRowTop) < 15) {
                 const targetCenter = targetRect.left + targetRect.width / 2;
                 const distance = Math.abs(currentCenter - targetCenter);
@@ -171,34 +161,25 @@ function App() {
             }
           }
 
-          if (bestMatch !== -1) {
-            nextIndex = filterCount + bestMatch;
-          } else {
-            if (statusCount > 0) {
-              const colIndex = currentCardIndex % 4; 
-              nextIndex = categoryCount + Math.min(colIndex, statusCount - 1);
-            } else {
-              shouldPreventDefault = false;
-            }
-          }
+          if (bestMatch !== -1) nextIndex = filterCount + bestMatch;
+          else if (statusCount > 0) {
+            const colIndex = currentCardIndex % 4; 
+            nextIndex = categoryCount + Math.min(colIndex, statusCount - 1);
+          } else shouldPreventDefault = false;
         }
         else if (isStatusFilter) {
           const statusIndex = currentIndex - categoryCount;
           if (statusIndex === 0 || statusIndex === 1) nextIndex = 0;
           else nextIndex = 1;
         } 
-        else if (isCategoryFilter) {
-          shouldPreventDefault = false;
-        }
+        else if (isCategoryFilter) shouldPreventDefault = false;
       } 
       else if (e.key === 'Enter' || e.key === 'Ok' || e.key === ' ') {
         e.preventDefault();
         currentElement.click();
         return;
       } 
-      else {
-        return;
-      }
+      else return;
 
       if (shouldPreventDefault && nextIndex >= 0 && nextIndex < allFocusables.length) {
         e.preventDefault();
@@ -220,82 +201,163 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedMatch, selectedCategory, selectedStatus, matches.length]);
 
-  // 🎯 ၂။ Data Fetching Logic (Error Handling ထည့်ထားသည်)
+  // 🎯 ။ Data Fetching Logic (အနည်းဆုံး ၅ စက္ကန့် Loading ပြမယ်)
   useEffect(() => {
-    const fetchData = async (isBackground = false) => {
-      if (!isBackground) {
-        setLoading(true);
-        setConnectionError(false); // ✅ Fetch စတင်တိုင်း Error ကို Reset လုပ်မယ်
-      }
-      
-      try {
-        let rawData = [];
-        if (selectedCategory === 'vnserver') {
-          const response = await fetch(`https://raw.githubusercontent.com/devxseven/mdata/refs/heads/main/matches.json?t=${Date.now()}`);
-          if (!response.ok) throw new Error('Failed to fetch VN data');
-          const data = await response.json();
-          rawData = data.context || [];
-        } else if (selectedCategory === 'myanmarsound') {
-          const response = await fetch(`/api/fmp-data?t=${Date.now()}`); 
-          if (!response.ok) throw new Error('Failed to fetch FMP data from API');
-          rawData = await response.json(); 
+    let isCancelled = false;
+
+    const fetchData = async (isInitialLoad = false) => {
+      if (isInitialLoad) {
+        setInitialLoading(true);
+        setConnectionError(false);
+        
+        // Fetch ကို စတင်မယ် (ဒါပေမယ့် Result ကို ျက်ချင်း မသုံးဘူး)
+        const fetchPromise = (async () => {
+          try {
+            let rawData = [];
+            if (selectedCategory === 'vnserver') {
+              const response = await fetch(`https://raw.githubusercontent.com/devxseven/mdata/refs/heads/main/matches.json?t=${Date.now()}`);
+              if (!response.ok) throw new Error('Failed to fetch VN data');
+              const data = await response.json();
+              rawData = data.context || [];
+            } else if (selectedCategory === 'myanmarsound') {
+              const response = await fetch(`/api/fmp-data?t=${Date.now()}`); 
+              if (!response.ok) throw new Error('Failed to fetch FMP data from API');
+              rawData = await response.json(); 
+            }
+
+            const processedMatches = rawData.map(match => {
+              const rawTime = match.match_time;
+              let dateObj = typeof rawTime === 'string' && /^\d{10,}$/.test(rawTime) 
+                ? new Date(parseInt(rawTime, 10) * 1000) 
+                : new Date(rawTime);
+
+              const myanmarTime = dateObj.toLocaleString('en-US', {
+                timeZone: 'Asia/Yangon', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
+              });
+
+              return {
+                id: match.id,
+                homeTeam: { name: match.home_name || match.homeTeam?.name, logo: match.home_img || match.homeTeam?.logo },
+                awayTeam: { name: match.away_name || match.awayTeam?.name, logo: match.away_img || match.awayTeam?.logo },
+                league: match.league,
+                matchStatus: match.match_status === true, 
+                myanmarTime: myanmarTime,
+                links: match.links || [],
+                homeScore: match.homeScore ?? match.homeTeam?.score ?? 0,
+                awayScore: match.awayScore ?? match.awayTeam?.score ?? 0
+              };
+            });
+
+            return { success: true, data: processedMatches };
+          } catch (error) {
+            console.error("❌ Fetch Error:", error);
+            return { success: false, error };
+          }
+        })();
+
+        // ✅ အနည်းဆုံး ၅ စက္ကန့် စောင့်မယ်
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // ၅ စက္ကန့် ပြည့်မှ Fetch Result ကို စစ်မယ်
+        if (!isCancelled) {
+          const result = await fetchPromise;
+          
+          if (result.success) {
+            // ✅ Internet ရှိရင် Homepage ကို သွားမယ်
+            setMatches(result.data);
+            const liveCount = result.data.filter(m => m.matchStatus).length;
+            const upcomingCount = result.data.filter(m => !m.matchStatus).length;
+            
+            setCategoryCounts(prev => ({ ...prev, [selectedCategory]: result.data.length }));
+            setStatuses([
+              { id: 'all', name: 'All', count: result.data.length },
+              { id: 'live', name: 'Live', count: liveCount },
+              { id: 'upcoming', name: 'Upcoming', count: upcomingCount },
+            ]);
+            
+            setInitialLoading(false);
+            setConnectionError(false);
+            isFirstLoad.current = false;
+          } else {
+            // ✅ Internet မရှိရင် Error Screen ပြမယ်
+            setInitialLoading(false);
+            setConnectionError(true);
+          }
         }
+      } else {
+        // Background Refresh (15 sec) - Loading မပြဘူး
+        try {
+          let rawData = [];
+          if (selectedCategory === 'vnserver') {
+            const response = await fetch(`https://raw.githubusercontent.com/devxseven/mdata/refs/heads/main/matches.json?t=${Date.now()}`);
+            if (!response.ok) throw new Error('Failed to fetch VN data');
+            const data = await response.json();
+            rawData = data.context || [];
+          } else if (selectedCategory === 'myanmarsound') {
+            const response = await fetch(`/api/fmp-data?t=${Date.now()}`); 
+            if (!response.ok) throw new Error('Failed to fetch FMP data from API');
+            rawData = await response.json(); 
+          }
 
-        const processedMatches = rawData.map(match => {
-          const rawTime = match.match_time;
-          let dateObj = typeof rawTime === 'string' && /^\d{10,}$/.test(rawTime) 
-            ? new Date(parseInt(rawTime, 10) * 1000) 
-            : new Date(rawTime);
+          const processedMatches = rawData.map(match => {
+            const rawTime = match.match_time;
+            let dateObj = typeof rawTime === 'string' && /^\d{10,}$/.test(rawTime) 
+              ? new Date(parseInt(rawTime, 10) * 1000) 
+              : new Date(rawTime);
 
-          const myanmarTime = dateObj.toLocaleString('en-US', {
-            timeZone: 'Asia/Yangon', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
+            const myanmarTime = dateObj.toLocaleString('en-US', {
+              timeZone: 'Asia/Yangon', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
+            });
+
+            return {
+              id: match.id,
+              homeTeam: { name: match.home_name || match.homeTeam?.name, logo: match.home_img || match.homeTeam?.logo },
+              awayTeam: { name: match.away_name || match.awayTeam?.name, logo: match.away_img || match.awayTeam?.logo },
+              league: match.league,
+              matchStatus: match.match_status === true, 
+              myanmarTime: myanmarTime,
+              links: match.links || [],
+              homeScore: match.homeScore ?? match.homeTeam?.score ?? 0,
+              awayScore: match.awayScore ?? match.awayTeam?.score ?? 0
+            };
           });
 
-          return {
-            id: match.id,
-            homeTeam: { name: match.home_name || match.homeTeam?.name, logo: match.home_img || match.homeTeam?.logo },
-            awayTeam: { name: match.away_name || match.awayTeam?.name, logo: match.away_img || match.awayTeam?.logo },
-            league: match.league,
-            matchStatus: match.match_status === true, 
-            myanmarTime: myanmarTime,
-            links: match.links || [],
-            homeScore: match.homeScore ?? match.homeTeam?.score ?? 0,
-            awayScore: match.awayScore ?? match.awayTeam?.score ?? 0
-          };
-        });
-
-        setMatches(processedMatches);
-        const liveCount = processedMatches.filter(m => m.matchStatus).length;
-        const upcomingCount = processedMatches.filter(m => !m.matchStatus).length;
-        
-        setCategoryCounts(prev => ({ ...prev, [selectedCategory]: processedMatches.length }));
-        setStatuses([
-          { id: 'all', name: 'All', count: processedMatches.length },
-          { id: 'live', name: 'Live', count: liveCount },
-          { id: 'upcoming', name: 'Upcoming', count: upcomingCount },
-        ]);
-        
-        setConnectionError(false); // ✅ အောင်မြင်ရင် Error ကို ဖျောက်မယ်
-
-      } catch (error) {
-        console.error("❌ Fetch Error:", error);
-        // ✅ Network/VPN Error ဖြစ်ရင် Custom Error Screen ပြမယ်
-        if (!isBackground) {
-          setConnectionError(true);
+          setMatches(processedMatches);
+          const liveCount = processedMatches.filter(m => m.matchStatus).length;
+          const upcomingCount = processedMatches.filter(m => !m.matchStatus).length;
+          
+          setCategoryCounts(prev => ({ ...prev, [selectedCategory]: processedMatches.length }));
+          setStatuses([
+            { id: 'all', name: 'All', count: processedMatches.length },
+            { id: 'live', name: 'Live', count: liveCount },
+            { id: 'upcoming', name: 'Upcoming', count: upcomingCount },
+          ]);
+        } catch (error) {
+          console.error("❌ Background Fetch Error:", error);
+          // Silent fail - Loading မပြဘူး
         }
-      } finally {
-        if (!isBackground) setLoading(false);
       }
     };
 
-    fetchData(false);
-    const interval = setInterval(() => fetchData(true), 15000);
-    return () => clearInterval(interval);
-  }, [selectedCategory, retryTrigger]); // ✅ retryTrigger ကို ထည့်ထားသည်
+    if (isFirstLoad.current) {
+      fetchData(true);
+    }
 
-  // ✅ Retry Button နှိပ်ရင် အလုပ်လုပ်မည့် Function
+    const interval = setInterval(() => {
+      if (!connectionError) {
+        fetchData(false);
+      }
+    }, 15000);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, [selectedCategory, retryTrigger, connectionError]);
+
   const handleRetry = () => {
     setRetryTrigger(prev => prev + 1);
+    isFirstLoad.current = true;
   };
 
   // 🎯 ၃။ Click Handlers
@@ -325,7 +387,6 @@ function App() {
     }, 100);
   };
 
-  // 🎯 ၄။ Browser/Mobile Back Button Listener
   useEffect(() => {
     const handlePopState = (event) => {
       const state = event.state;
@@ -356,25 +417,36 @@ function App() {
     return true;
   });
 
-  // ✅ Custom Error Screen (VPN/Internet မရှိရင် ပြမယ်)
+  // ✅ ၁။ Initial Loading Screen (အနည်းဆုံး ၅ စက္ကန့် ပြမယ်)
+  if (initialLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">ဝင်ရောက်မှုစစ်ဆေးနေသည်... (ကျေးဇူးပြု၍ စောင့်ပါ)</p>
+      </div>
+    );
+  }
+
+  // ✅ ၂။ Connection Error Screen
   if (connectionError) {
     return (
       <div className="connection-error-container">
         <div className="error-content">
           <div className="error-icon">🌐</div>
-          <h2 className="error-title">အင်တာနက် ချိတ်ဆက်မှု မရှိပါ</h2>
+          <h2 className="error-title">ချိတ်ဆက်မှု မှားယွင်းနေသည်</h2>
           <p className="error-message">
             ကျေးဇူးပြု၍ VPN အသုံးပြုပါ<br />
             သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ
           </p>
           <button className="retry-button" onClick={handleRetry}>
-            🔄 ပြန်စမ်းကြည့်မည်
+            🔄 ပြန်လည်စစ်ဆေးပါ
           </button>
         </div>
       </div>
     );
   }
 
+  // ✅ ၃။ Main Homepage
   return (
     <div className="app">
       <Header />
@@ -396,12 +468,7 @@ function App() {
       </div>
       
       <main className="main-content">
-        {loading ? (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p className="loading-text">ဝင်ရောက်နေသည်...</p>
-          </div>
-        ) : filteredMatches.length === 0 ? (
+        {filteredMatches.length === 0 ? (
           <div className="no-matches"><p>No matches found for this filter.</p></div>
         ) : (
           <div className="matches-list">
