@@ -9,7 +9,8 @@ import './App.css';
 
 function App() {
   const [matches, setMatches] = useState([]);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialCheck, setInitialCheck] = useState(true);
+  const [loading, setLoading] = useState(false); // ✅ Category ပြောင်းရင် ပြမယ့် Loading
   const [connectionError, setConnectionError] = useState(false);
   const [retryTrigger, setRetryTrigger] = useState(0);
   
@@ -27,7 +28,8 @@ function App() {
 
   const hasInitialFocused = useRef(false);
   const lastFocusedMatchId = useRef(null);
-  const isFirstLoad = useRef(true);
+  const hasLoadedOnce = useRef(false);
+  const prevCategoryRef = useRef('vnserver'); // ✅ ယခင် Category ကို မှတ်ထားရန်
 
   useEffect(() => {
     const mainContent = document.querySelector('.main-content');
@@ -37,7 +39,7 @@ function App() {
     }
   }, []);
 
-  //  ၁။ Keyboard Navigation Logic (မူလအတိုင်း)
+  // 🎯 ၁။ Keyboard Navigation Logic (မူလအတိုင်း)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (window.innerWidth < 768 || selectedMatch) return;
@@ -201,91 +203,23 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedMatch, selectedCategory, selectedStatus, matches.length]);
 
-  // 🎯 ။ Data Fetching Logic (အနည်းဆုံး ၅ စက္ကန့် Loading ပြမယ်)
+  // 🎯 ၂။ Data Fetching Logic (Category ပြောင်းမှသာ Loading ပြမယ်)
   useEffect(() => {
     let isCancelled = false;
 
-    const fetchData = async (isInitialLoad = false) => {
-      if (isInitialLoad) {
-        setInitialLoading(true);
+    const fetchData = async (isInitialCheck, isCategoryChanged = false) => {
+      // Initial Check (App ဝင်ဝင်ချင်း သို့မဟုတ် Retry)
+      if (isInitialCheck) {
+        setInitialCheck(true);
         setConnectionError(false);
-        
-        // Fetch ကို စတင်မယ် (ဒါပေမယ့် Result ကို ျက်ချင်း မသုံးဘူး)
-        const fetchPromise = (async () => {
-          try {
-            let rawData = [];
-            if (selectedCategory === 'vnserver') {
-              const response = await fetch(`https://raw.githubusercontent.com/devxseven/mdata/refs/heads/main/matches.json?t=${Date.now()}`);
-              if (!response.ok) throw new Error('Failed to fetch VN data');
-              const data = await response.json();
-              rawData = data.context || [];
-            } else if (selectedCategory === 'myanmarsound') {
-              const response = await fetch(`/api/fmp-data?t=${Date.now()}`); 
-              if (!response.ok) throw new Error('Failed to fetch FMP data from API');
-              rawData = await response.json(); 
-            }
+      }
+      
+      // ✅ Category ပြောင်းရင်သာ Loading ပြမယ်
+      if (isCategoryChanged && !isInitialCheck) {
+        setLoading(true);
+      }
 
-            const processedMatches = rawData.map(match => {
-              const rawTime = match.match_time;
-              let dateObj = typeof rawTime === 'string' && /^\d{10,}$/.test(rawTime) 
-                ? new Date(parseInt(rawTime, 10) * 1000) 
-                : new Date(rawTime);
-
-              const myanmarTime = dateObj.toLocaleString('en-US', {
-                timeZone: 'Asia/Yangon', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
-              });
-
-              return {
-                id: match.id,
-                homeTeam: { name: match.home_name || match.homeTeam?.name, logo: match.home_img || match.homeTeam?.logo },
-                awayTeam: { name: match.away_name || match.awayTeam?.name, logo: match.away_img || match.awayTeam?.logo },
-                league: match.league,
-                matchStatus: match.match_status === true, 
-                myanmarTime: myanmarTime,
-                links: match.links || [],
-                homeScore: match.homeScore ?? match.homeTeam?.score ?? 0,
-                awayScore: match.awayScore ?? match.awayTeam?.score ?? 0
-              };
-            });
-
-            return { success: true, data: processedMatches };
-          } catch (error) {
-            console.error("❌ Fetch Error:", error);
-            return { success: false, error };
-          }
-        })();
-
-        // ✅ အနည်းဆုံး ၅ စက္ကန့် စောင့်မယ်
-        await new Promise(resolve => setTimeout(resolve, 5000));
-
-        // ၅ စက္ကန့် ပြည့်မှ Fetch Result ကို စစ်မယ်
-        if (!isCancelled) {
-          const result = await fetchPromise;
-          
-          if (result.success) {
-            // ✅ Internet ရှိရင် Homepage ကို သွားမယ်
-            setMatches(result.data);
-            const liveCount = result.data.filter(m => m.matchStatus).length;
-            const upcomingCount = result.data.filter(m => !m.matchStatus).length;
-            
-            setCategoryCounts(prev => ({ ...prev, [selectedCategory]: result.data.length }));
-            setStatuses([
-              { id: 'all', name: 'All', count: result.data.length },
-              { id: 'live', name: 'Live', count: liveCount },
-              { id: 'upcoming', name: 'Upcoming', count: upcomingCount },
-            ]);
-            
-            setInitialLoading(false);
-            setConnectionError(false);
-            isFirstLoad.current = false;
-          } else {
-            // ✅ Internet မရှိရင် Error Screen ပြမယ်
-            setInitialLoading(false);
-            setConnectionError(true);
-          }
-        }
-      } else {
-        // Background Refresh (15 sec) - Loading မပြဘူး
+      const fetchPromise = (async () => {
         try {
           let rawData = [];
           if (selectedCategory === 'vnserver') {
@@ -322,30 +256,72 @@ function App() {
             };
           });
 
-          setMatches(processedMatches);
-          const liveCount = processedMatches.filter(m => m.matchStatus).length;
-          const upcomingCount = processedMatches.filter(m => !m.matchStatus).length;
+          return { success: true, data: processedMatches };
+        } catch (error) {
+          console.error("❌ Fetch Error:", error);
+          return { success: false, error };
+        }
+      })();
+
+      // 5 စက္ကန့် စောင့်ဆိုင်းမှု (Initial Check ဖြစ်မှသာ)
+      if (isInitialCheck) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+
+      if (!isCancelled) {
+        const result = await fetchPromise;
+        
+        if (result.success) {
+          setMatches(result.data);
+          const liveCount = result.data.filter(m => m.matchStatus).length;
+          const upcomingCount = result.data.filter(m => !m.matchStatus).length;
           
-          setCategoryCounts(prev => ({ ...prev, [selectedCategory]: processedMatches.length }));
+          setCategoryCounts(prev => ({ ...prev, [selectedCategory]: result.data.length }));
           setStatuses([
-            { id: 'all', name: 'All', count: processedMatches.length },
+            { id: 'all', name: 'All', count: result.data.length },
             { id: 'live', name: 'Live', count: liveCount },
             { id: 'upcoming', name: 'Upcoming', count: upcomingCount },
           ]);
-        } catch (error) {
-          console.error("❌ Background Fetch Error:", error);
-          // Silent fail - Loading မပြဘူး
+          
+          if (isInitialCheck) {
+            setInitialCheck(false);
+            hasLoadedOnce.current = true;
+          }
+          
+          // ✅ Category ပြောင်းတာဆိုရင် Loading ကို ပိတ်မယ်
+          if (isCategoryChanged && !isInitialCheck) {
+            setLoading(false);
+          }
+        } else {
+          if (isInitialCheck) {
+            setInitialCheck(false);
+            setConnectionError(true);
+          }
+          if (isCategoryChanged && !isInitialCheck) {
+            setLoading(false);
+          }
         }
       }
     };
 
-    if (isFirstLoad.current) {
-      fetchData(true);
+    // ✅ Category ပြောင်း/မပြောင်း စစ်ဆေးမယ်
+    const isCategoryChanged = prevCategoryRef.current !== selectedCategory;
+    
+    // ပထမဆုံး Load (သို့) Retry ဖြစ်ရင် isInitialCheck = true
+    if (!hasLoadedOnce.current) {
+      fetchData(true, false);
+    } else {
+      // ✅ Category ပြောင်းရင် isCategoryChanged = true, မပြောင်းရင် false
+      fetchData(false, isCategoryChanged);
     }
+    
+    // ✅ Category ပြောင်းပြီးရင် prevCategory ကို update လုပ်မယ်
+    prevCategoryRef.current = selectedCategory;
 
+    // 15 စက္ကန့်တစ်ခါ Background Update (Category မပြောင်းတဲ့အတွက် Loading မပြဘူး)
     const interval = setInterval(() => {
-      if (!connectionError) {
-        fetchData(false);
+      if (hasLoadedOnce.current && !connectionError) {
+        fetchData(false, false); // isCategoryChanged = false
       }
     }, 15000);
 
@@ -356,11 +332,10 @@ function App() {
   }, [selectedCategory, retryTrigger, connectionError]);
 
   const handleRetry = () => {
+    hasLoadedOnce.current = false;
     setRetryTrigger(prev => prev + 1);
-    isFirstLoad.current = true;
   };
 
-  // 🎯 ၃။ Click Handlers
   const handleMatchClick = (match) => {
     setSelectedMatch(match);
     lastFocusedMatchId.current = match.id;
@@ -417,8 +392,8 @@ function App() {
     return true;
   });
 
-  // ✅ ၁။ Initial Loading Screen (အနည်းဆုံး ၅ စက္ကန့် ပြမယ်)
-  if (initialLoading) {
+  // ✅ ၁။ Initial Loading Screen (App ဝင်ဝင်ချင်း 5 စက္ကန့် ပြမယ်)
+  if (initialCheck) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
@@ -427,15 +402,15 @@ function App() {
     );
   }
 
-  // ✅ ၂။ Connection Error Screen
+  // ✅ ၂။ Connection Error Screen (VPN မရှိရင် ပြမယ်)
   if (connectionError) {
     return (
       <div className="connection-error-container">
         <div className="error-content">
-          <div className="error-icon">🌐</div>
+          <div className="error-icon"></div>
           <h2 className="error-title">ချိတ်ဆက်မှု မှားယွင်းနေသည်</h2>
           <p className="error-message">
-            ကျေးဇူးပြု၍ VPN အသုံးပြုပါ<br />
+            ကျေးူးပြု၍ VPN အသုံးပြုပါ<br />
             သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ
           </p>
           <button className="retry-button" onClick={handleRetry}>
@@ -468,7 +443,10 @@ function App() {
       </div>
       
       <main className="main-content">
-        {filteredMatches.length === 0 ? (
+        {/* ✅ Category ပြောင်းရင်သာ Loading ပြမယ် */}
+        {loading ? (
+          <div className="loading"><div className="spinner"></div><p>Loading matches...</p></div>
+        ) : filteredMatches.length === 0 ? (
           <div className="no-matches"><p>No matches found for this filter.</p></div>
         ) : (
           <div className="matches-list">
