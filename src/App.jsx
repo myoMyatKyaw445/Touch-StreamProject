@@ -10,6 +10,9 @@ import './App.css';
 function App() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false); // ✅ အသစ်ထည့်ထားသည်
+  const [retryTrigger, setRetryTrigger] = useState(0); // ✅ Retry လုပ်ရန်
+  
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [activeLink, setActiveLink] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -217,10 +220,14 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedMatch, selectedCategory, selectedStatus, matches.length]);
 
-  // 🎯 ၂။ Data Fetching Logic
+  // 🎯 ၂။ Data Fetching Logic (Error Handling ထည့်ထားသည်)
   useEffect(() => {
     const fetchData = async (isBackground = false) => {
-      if (!isBackground) setLoading(true);
+      if (!isBackground) {
+        setLoading(true);
+        setConnectionError(false); // ✅ Fetch စတင်တိုင်း Error ကို Reset လုပ်မယ်
+      }
+      
       try {
         let rawData = [];
         if (selectedCategory === 'vnserver') {
@@ -267,8 +274,15 @@ function App() {
           { id: 'live', name: 'Live', count: liveCount },
           { id: 'upcoming', name: 'Upcoming', count: upcomingCount },
         ]);
+        
+        setConnectionError(false); // ✅ အောင်မြင်ရင် Error ကို ဖျောက်မယ်
+
       } catch (error) {
         console.error("❌ Fetch Error:", error);
+        // ✅ Network/VPN Error ဖြစ်ရင် Custom Error Screen ပြမယ်
+        if (!isBackground) {
+          setConnectionError(true);
+        }
       } finally {
         if (!isBackground) setLoading(false);
       }
@@ -277,7 +291,12 @@ function App() {
     fetchData(false);
     const interval = setInterval(() => fetchData(true), 15000);
     return () => clearInterval(interval);
-  }, [selectedCategory]);
+  }, [selectedCategory, retryTrigger]); // ✅ retryTrigger ကို ထည့်ထားသည်
+
+  // ✅ Retry Button နှိပ်ရင် အလုပ်လုပ်မည့် Function
+  const handleRetry = () => {
+    setRetryTrigger(prev => prev + 1);
+  };
 
   // 🎯 ၃။ Click Handlers
   const handleMatchClick = (match) => {
@@ -337,11 +356,29 @@ function App() {
     return true;
   });
 
+  // ✅ Custom Error Screen (VPN/Internet မရှိရင် ပြမယ်)
+  if (connectionError) {
+    return (
+      <div className="connection-error-container">
+        <div className="error-content">
+          <div className="error-icon">🌐</div>
+          <h2 className="error-title">အင်တာနက် ချိတ်ဆက်မှု မရှိပါ</h2>
+          <p className="error-message">
+            ကျေးဇူးပြု၍ VPN အသုံးပြုပါ<br />
+            သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ
+          </p>
+          <button className="retry-button" onClick={handleRetry}>
+            🔄 ပြန်စမ်းကြည့်မည်
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <Header />
       
-      {/* ✅ Filter တွေကို main-content အပြင်ဘက်မှာ ထားပါ */}
       <div className="filters-wrapper">
         <CategoryFilter 
           categories={[
@@ -360,7 +397,10 @@ function App() {
       
       <main className="main-content">
         {loading ? (
-          <div className="loading"><div className="spinner"></div><p>Loading matches...</p></div>
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">ဝင်ရောက်နေသည်...</p>
+          </div>
         ) : filteredMatches.length === 0 ? (
           <div className="no-matches"><p>No matches found for this filter.</p></div>
         ) : (
