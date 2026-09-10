@@ -675,7 +675,7 @@ body {
 /* ANDROID TV & LARGE DESKTOP (1024px+) */
 /* ========================================== */
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) { 
   .matches-list {
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 18px !important;
@@ -781,7 +781,6 @@ body {
     font-size: 0.6rem;
   }
   
-  /* ✅ Main content ကို Top Nav အောက် ရွှေ့မယ် */
   .main-content {
     padding-top: 250px !important;
   }
@@ -791,7 +790,7 @@ body {
 /* EXTRA LARGE SCREENS (TV 4K - 1440px+) */
 /* ========================================== */
 
-@media (min-width: 1440px) {
+@media (min-width: 1100px) {
   .main-content {
      padding: 30px;
      padding-top: 260px !important; /* ✅ 200px အစား 240px */
@@ -804,7 +803,7 @@ body {
   }
   
   .matches-list {
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(5, 1fr) !important;
     gap: 20px !important;
   }
   
@@ -1269,22 +1268,10 @@ body {
 }
 
 /* ========================================== */
-/* GLOBAL FIX FOR ALL LARGE SCREENS (Lowered Breakpoint) */
+/* GLOBAL FIX FOR ALL LARGE SCREENS */
 /* ========================================== */
 
-/* 768px (Tablet/TV) အထက်ဆိုရင် Top Nav ပြမယ် */
-@media screen and (min-width: 768px) {
-  .bottom-nav {
-    display: none !important;
-  }
-  
-  .top-nav {
-    display: flex !important;
-  }
-}
-
-/* 1024px (Laptop/TV) အထက်ဆိုရင် Top Nav ပြမယ် */
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 900px) {  /* ✅ 1024px အစား 900px */
   .bottom-nav {
     display: none !important;
   }
