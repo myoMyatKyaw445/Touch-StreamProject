@@ -41,16 +41,15 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: fixed; /* sticky အစား fixed သုံးမယ် */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
   width: 100%;
-  height: 60px; /* Header အမြင့်ကို အတိအကျ သတ်မှတ်မယ် */
+  height: 60px;
 }
-
 
 .header-left {
   display: flex;
@@ -96,18 +95,19 @@ body {
 .main-content {
   flex: 1;
   padding: 15px;
-  padding-top: 280px; /* Header (60px) + Filter (~180px) + Spacing (40px) */
+  padding-top: 240px; /* ✅ 190px အစား 220px (ပိုများအောင်) */
   padding-bottom: 70px;
   overflow-y: auto;
   width: 100%;
   margin-top: 0;
 }
+
 .filters-wrapper {
   position: fixed;
-  top: 60px; /* Header အမြင့် (60px) အောက်မှာ */
+  top: 60px; /* ✅ Header အောက်မှာ အတိအကျ */
   left: 0;
   right: 0;
-  z-index: 99; /* Header (100) အောက် */
+  z-index: 99;
   background: linear-gradient(180deg, #0f0c29 0%, #302b63 100%);
   backdrop-filter: blur(10px);
   padding: 10px 15px;
@@ -410,7 +410,7 @@ body {
   flex-shrink: 0;
 }
 
-/* Bottom Navigation */
+/* Bottom Navigation - Mobile/Tablet အတွက် */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -419,25 +419,25 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   justify-content: space-around;
-  padding: 8px 0; /* ✅ 6px 0 ကနေ 8px 0 */
+  padding: 8px 0;
   box-shadow: 0 -4px 20px rgba(102, 126, 234, 0.3);
   z-index: 100;
   width: 100%;
-  min-height: 55px; /* ✅ height: 50px အစား min-height: 55px */
-  align-items: center; /* ✅ အလယ်မှာ ညှိအောင် */
+  min-height: 55px;
+  align-items: center;
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* ✅ အလယ်မှာ ှိအောင် */
-  gap: 2px; /* ✅ 3px ကနေ 2px */
+  justify-content: center;
+  gap: 2px;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  padding: 4px 10px; /* ✅ 3px 12px ကနေ 4px 10px */
+  padding: 4px 10px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -451,6 +451,61 @@ body {
 
 .nav-label {
   font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* ========================================== */
+/* TOP NAVIGATION - Desktop/Laptop/TV အတွက် */
+/* ========================================== */
+.top-nav {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 150px; /* ✅ Header ထဲမှာ ညာဘက်နား */
+  left: auto;
+  background: transparent;
+  justify-content: flex-end;
+  gap: 5px; /* ✅ ပိုနည်းအောင် */
+  padding: 0 10px;
+  box-shadow: none;
+  z-index: 101;
+  height: 60px;
+  align-items: center;
+}
+
+.top-nav .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  padding: 5px 10px; /* ✅ ပိုသေးအောင် */
+  transition: all 0.2s;
+  border-radius: 6px;
+  min-width: 60px; /* ✅ ပိုသေးအောင် */
+}
+
+.top-nav .nav-item.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.top-nav .nav-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.top-nav .nav-icon {
+  font-size: 0.85rem;
+}
+
+.top-nav .nav-label {
+  font-size: 0.6rem;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -517,7 +572,6 @@ body {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 15px !important;
   }
-}
   
   .match-card {
     height: 100%;
@@ -615,7 +669,7 @@ body {
     animation: pulse 2s infinite;
     flex-shrink: 0;
   }
-
+}
 
 /* ========================================== */
 /* ANDROID TV & LARGE DESKTOP (1024px+) */
@@ -632,7 +686,7 @@ body {
     overflow: hidden;
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid rgba(255, 255, 255, 0.15);
-    min-height: 180px; /* ✅ 220px ကနေ 180px ကို လျှော့ချ */
+    min-height: 180px;
   }
   
   .match-card:hover {
@@ -642,28 +696,28 @@ body {
   }
   
   .timer-badge {
-    font-size: 0.75rem; /* ✅ 0.9rem ကနေ 0.75rem */
-    padding: 6px; /* ✅ 10px ကနေ 6px */
+    font-size: 0.75rem;
+    padding: 6px;
     font-weight: 700;
   }
   
   .teams-section {
-    padding: 10px 10px; /* ✅ 18px 12px ကနေ 10px 10px */
+    padding: 10px 10px;
   }
   
   .team-logo {
-    width: 32px; /* ✅ 40px ကနေ 32px */
+    width: 32px;
     height: 32px;
-    padding: 2px; /* ✅ 3px ကနေ 2px */
+    padding: 2px;
   }
   
   .team-logo-wrapper {
-    width: 32px; /* ✅ 40px ကနေ 32px */
+    width: 32px;
     height: 32px;
   }
   
   .team-name {
-    font-size: 0.75rem; /* ✅ 0.9rem ကနေ 0.75rem */
+    font-size: 0.75rem;
     font-weight: 600;
     text-align: center;
     word-break: break-word;
@@ -677,11 +731,11 @@ body {
   }
   
   .vs-section {
-    padding: 0 6px; /* ✅ 0 8px ကနေ 0 6px */
+    padding: 0 6px;
   }
   
   .vs-text {
-    font-size: 1.1rem; /* ✅ 1.4rem ကနေ 1.1rem */
+    font-size: 1.1rem;
     font-weight: 700;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
@@ -690,17 +744,46 @@ body {
   }
   
   .league-section {
-    padding: 8px 10px; /* ✅ 12px 15px ကနေ 8px 10px */
-    min-height: 40px; /* ✅ 50px ကနေ 40px */
+    padding: 8px 10px;
+    min-height: 40px;
   }
   
   .league-name {
-    font-size: 0.75rem; /* ✅ 0.9rem ကနေ 0.75rem */
+    font-size: 0.75rem;
   }
   
   .live-badge {
-    font-size: 0.65rem; /* ✅ 0.75rem ကနေ 0.65rem */
-    padding: 3px 6px; /* ✅ 5px 10px ကနေ 3px 6px */
+    font-size: 0.65rem;
+    padding: 3px 6px;
+  }
+  
+  /* ✅ Top Nav ပြမယ်၊ Bottom Nav ဖျောက်မယ် */
+  .bottom-nav {
+    display: none !important;
+  }
+  
+  .top-nav {
+    display: flex !important;
+    right: 150px;
+    padding: 0 10px;
+  }
+  
+  .top-nav .nav-item {
+    padding: 5px 10px;
+    min-width: 60px;
+  }
+  
+  .top-nav .nav-icon {
+    font-size: 0.85rem;
+  }
+  
+  .top-nav .nav-label {
+    font-size: 0.6rem;
+  }
+  
+  /* ✅ Main content ကို Top Nav အောက် ရွှေ့မယ် */
+  .main-content {
+    padding-top: 250px !important;
   }
 }
 
@@ -710,13 +793,14 @@ body {
 
 @media (min-width: 1440px) {
   .main-content {
-    padding: 30px;
-    padding-top: 280px;
+     padding: 30px;
+     padding-top: 260px !important; /* ✅ 200px အစား 240px */
     max-width: 1600px;
   }
   
   .filters-wrapper {
-    padding: 15px 30px !important;
+     padding: 15px 40px !important;
+    padding-left: 50px !important;
   }
   
   .matches-list {
@@ -725,11 +809,11 @@ body {
   }
   
   .match-card {
-    min-height: 190px; /* ✅ 240px ကနေ 190px */
+    min-height: 190px;
   }
   
   .team-logo {
-    width: 35px; /* ✅ 45px ကနေ 35px */
+    width: 35px;
     height: 35px;
   }
   
@@ -739,29 +823,38 @@ body {
   }
   
   .team-name {
-    font-size: 0.8rem; /* ✅ 1rem ကနေ 0.8rem */
+    font-size: 0.8rem;
   }
   
   .league-section {
-    min-height: 42px; /* ✅ 55px ကနေ 42px */
+    min-height: 42px;
   }
   
   .league-name {
-    font-size: 0.8rem; /* ✅ 0.95rem ကနေ 0.8rem */
+    font-size: 0.8rem;
   }
-   /* ✅ Bottom Nav for Large TV */
+  
+  /* ✅ Top Nav ပြမယ်၊ Bottom Nav ဖျောက်မယ် */
   .bottom-nav {
-    min-height: 70px !important;
-    padding: 12px 0 !important;
+    display: none !important;
   }
   
-  .nav-item {
-    padding: 8px 15px !important;
-    gap: 4px !important;
+  .top-nav {
+    display: flex !important;
+    right: 200px; /* ✅ 4K TV မှာ ည်းနည်းရွှေ့ */
   }
   
-  .nav-label {
-    line-height: 1.3 !important;
+  .top-nav .nav-item {
+    padding: 5px 12px;
+    min-width: 65px;
+  }
+  
+  .top-nav .nav-icon {
+    font-size: 0.9rem;
+  }
+  
+  .top-nav .nav-label {
+     font-size: 0.65rem;
   }
 }
 
@@ -917,8 +1010,6 @@ body {
 /* ========================================== */
 /* FORCE GRID FOR ANDROID TV (Global Rule) */
 /* ========================================== */
-/* Android TV တွေက 768px အောက် (ဥပမာ 480px) လို့ ပြတတ်လို့ 
-   Media Query အပြင်ဘက်မှာ Global Rule အနေနဲ့ ထည့်ထားပါတယ် */
 
 .matches-list {
   display: grid !important;
@@ -945,34 +1036,19 @@ body {
 /* ========================================== */
 
 @media (min-width: 1024px) and (max-width: 1439px) {
-  /* ✅ Filter ကို ာဘက် နည်းနည်း ရွှေ့မယ် */
+  /* ✅ Filter ကို ဘယ်ဘက် နည်းနည်း ရွှေ့မယ် */
   .filters-wrapper {
-    padding: 10px 25px !important; /* ✅ 15px 18px အစား 10px 25px */
+    padding: 15px 30px !important;
+    padding-left: 35px !important;
   }
   
-  /* Category Filter ကို ဘယ်ဘက်ကနေ နည်းနည်း ရွှေ့မယ် */
+  /* Category Filter ကို ယ်ဘက်ကနေ နည်းနည်း ရွှေ့မယ် */
   .category-filter {
-    padding-left: 5px !important; /* ✅ ဘယ်ဘက်ကနေ 5px ချန်မယ် */
+    padding-left: 10px !important;
   }
   
-  /* ✅ Bottom Nav - Icon နဲ့ Text ကို သေးပြီး responsive ဖြစ်အောင် */
-  .bottom-nav {
-    min-height: 60px !important; /* ✅ 70px အစား 60px */
-    padding: 8px 0 !important;
-  }
-  
-  .nav-item {
-    padding: 4px 8px !important; /* ✅ ပိုသေးအောင် */
-    gap: 3px !important;
-  }
-  
-  .nav-icon {
-    font-size: 1.1rem !important; /* ✅ 1.3rem အစား 1.1rem (သေးအောင်) */
-  }
-  
-  .nav-label {
-    font-size: 0.6rem !important; /* ✅ 0.65rem အစား 0.6rem (သေးအောင်) */
-    line-height: 1.2 !important;
+  .status-filter {
+    padding-left: 10px !important;
   }
 }
 
@@ -1073,4 +1149,121 @@ body {
 
 .retry-button:active {
   transform: translateY(0);
+}
+
+/* ========================================== */
+/* ANDROID TV & 4K TV FOCUS STYLES (Override) */
+/* ========================================== */
+
+@media (min-width: 1024px) {
+  /* General Focusable Items */
+  .focusable-item:focus {
+    outline: none !important;
+    transform: scale(1.04);
+    z-index: 100;
+    box-shadow: none !important; /* ✅ Button ကိုယ်တိုင်မှာ Border မရှိတော့ */
+    background: transparent !important; /* ✅ Background ပါးပါးလေး */
+    transition: all 0.2s ease;
+  }
+
+  /* Category Filter Focus - Icon အဝိုင်းပေါ်မှာပဲ Focus ရောက်အောင် */
+  .category-btn.focusable-item {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .category-btn.focusable-item:focus .category-icon {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 0 3px #667eea, 0 0 10px rgba(102, 126, 234, 0.6) !important;
+    transform: scale(1.1);
+  }
+
+  .category-btn.focusable-item:focus .category-name {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 5px rgba(102, 126, 234, 0.8);
+  }
+
+  /* Status Filter Focus */
+  .status-btn.focusable-item:focus {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5)) !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 0 3px #667eea, 0 0 10px rgba(102, 126, 234, 0.6) !important;
+    transform: scale(1.05);
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+
+  /* Match Card Focus */
+  .match-card.focusable-item:focus {
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 0 4px #ffffff, 0 0 0 6px #667eea, 0 0 15px rgba(102, 126, 234, 0.6) !important;
+    transform: scale(1.03);
+    z-index: 50;
+    background: rgba(102, 126, 234, 0.15) !important;
+  }
+
+  .match-card.focusable-item:focus::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+  }
+
+  /* Top Nav Focus (Desktop/TV) */
+  .top-nav .nav-item:focus {
+    background: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #667eea, 0 0 10px rgba(102, 126, 234, 0.6) !important;
+    transform: scale(1.08);
+    z-index: 100;
+  }
+
+  /* Bottom Nav Focus */
+  .bottom-nav .nav-item:focus {
+    background: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #667eea !important;
+    transform: scale(1.05);
+  }
+}
+
+/* ========================================== */
+/* 4K TV FOCUS STYLES (1440px+) */
+/* ========================================== */
+
+@media (min-width: 1440px) {
+  .focusable-item:focus {
+    transform: scale(1.05);
+    box-shadow: none !important;
+  }
+
+  .category-btn.focusable-item:focus .category-icon {
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 0 4px #667eea, 0 0 15px rgba(102, 126, 234, 0.8) !important;
+    transform: scale(1.15);
+  }
+
+  .status-btn.focusable-item:focus {
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 0 4px #667eea, 0 0 15px rgba(102, 126, 234, 0.8) !important;
+    transform: scale(1.08);
+  }
+
+  .match-card.focusable-item:focus {
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 0 5px #ffffff, 0 0 0 8px #667eea, 0 0 20px rgba(102, 126, 234, 0.7) !important;
+    transform: scale(1.04);
+  }
+
+  .top-nav .nav-item:focus {
+    box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #667eea, 0 0 15px rgba(102, 126, 234, 0.8) !important;
+    transform: scale(1.1);
+  }
 }

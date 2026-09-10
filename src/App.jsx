@@ -10,10 +10,10 @@ import './App.css';
 function App() {
   const [matches, setMatches] = useState([]);
   const [initialCheck, setInitialCheck] = useState(true);
-  const [loading, setLoading] = useState(false); // ✅ Category ပြောင်းရင် ပြမယ့် Loading
+  const [loading, setLoading] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const [retryTrigger, setRetryTrigger] = useState(0);
-  
+  const [activeNav, setActiveNav] = useState('live');
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [activeLink, setActiveLink] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -29,7 +29,7 @@ function App() {
   const hasInitialFocused = useRef(false);
   const lastFocusedMatchId = useRef(null);
   const hasLoadedOnce = useRef(false);
-  const prevCategoryRef = useRef('vnserver'); // ✅ ယခင် Category ကို မှတ်ထားရန်
+  const prevCategoryRef = useRef('vnserver');
 
   useEffect(() => {
     const mainContent = document.querySelector('.main-content');
@@ -39,38 +39,61 @@ function App() {
     }
   }, []);
 
-  // 🎯 ၁။ Keyboard Navigation Logic (မူလအတိုင်း)
+  // 🎯 ၁။ Keyboard Navigation Logic (Desktop Top Nav + Mobile Bottom Nav supported)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (window.innerWidth < 768 || selectedMatch) return;
 
+      const isDesktop = window.innerWidth >= 1024;
+      const navFocusables = Array.from(document.querySelectorAll(isDesktop ? '.top-nav .focusable-item' : '.bottom-nav .focusable-item'));
       const filterFocusables = Array.from(document.querySelectorAll('.filters-wrapper .focusable-item'));
       const matchFocusables = Array.from(document.querySelectorAll('.matches-list .focusable-item'));
-      const navFocusables = Array.from(document.querySelectorAll('.bottom-nav .focusable-item'));
       
       if (filterFocusables.length === 0 && matchFocusables.length === 0) return;
 
-      const allFocusables = [...filterFocusables, ...matchFocusables, ...navFocusables];
+      const navCount = navFocusables.length;
+      const filterCount = 5; // 2 categories + 3 statuses
+      const matchCount = matchFocusables.length;
+
+      let allFocusables;
+      if (isDesktop) {
+        // Desktop: Nav (Top) -> Filters -> Matches
+        allFocusables = [...navFocusables, ...filterFocusables, ...matchFocusables];
+      } else {
+        // Mobile/Tablet: Filters -> Matches -> Nav (Bottom)
+        allFocusables = [...filterFocusables, ...matchFocusables, ...navFocusables];
+      }
+
       const currentElement = document.activeElement;
       const currentIndex = allFocusables.indexOf(currentElement);
 
       if (currentIndex === -1) {
-        if (allFocusables.length > 0) allFocusables[0].focus();
+        if (allFocusables.length > 0) {
+          if (isDesktop) {
+            allFocusables[navCount].focus(); // Desktop တွင် VN Server ကို အရင် Focus ပေးမယ်
+          } else {
+            allFocusables[0].focus(); // Mobile တွင် ပထမဆုံး Filter ကို Focus ပေးမယ်
+          }
+        }
         return;
       }
 
       let nextIndex = currentIndex;
       let shouldPreventDefault = true;
       
-      const categoryCount = 2;
-      const statusCount = 3;
-      const filterCount = categoryCount + statusCount;
-      const matchCount = matchFocusables.length;
-      
-      const isCategoryFilter = currentIndex < categoryCount;
-      const isStatusFilter = currentIndex >= categoryCount && currentIndex < filterCount;
-      const isMatchCard = currentIndex >= filterCount && currentIndex < filterCount + matchCount;
-      const isNav = currentIndex >= filterCount + matchCount;
+      let isNav, isCategoryFilter, isStatusFilter, isMatchCard;
+
+      if (isDesktop) {
+        isNav = currentIndex < navCount;
+        isCategoryFilter = currentIndex >= navCount && currentIndex < navCount + 2;
+        isStatusFilter = currentIndex >= navCount + 2 && currentIndex < navCount + filterCount;
+        isMatchCard = currentIndex >= navCount + filterCount;
+      } else {
+        isCategoryFilter = currentIndex < 2;
+        isStatusFilter = currentIndex >= 2 && currentIndex < filterCount;
+        isMatchCard = currentIndex >= filterCount && currentIndex < filterCount + matchCount;
+        isNav = currentIndex >= filterCount + matchCount;
+      }
 
       if (e.key === 'ArrowRight') {
         if (currentIndex < allFocusables.length - 1) nextIndex = currentIndex + 1;
@@ -81,12 +104,18 @@ function App() {
         else shouldPreventDefault = false;
       } 
       else if (e.key === 'ArrowDown') {
-        if (isCategoryFilter || isStatusFilter) {
-          if (matchCount > 0) nextIndex = filterCount;
-          else shouldPreventDefault = false;
-        } 
-        else if (isMatchCard) {
-          const currentCardIndex = currentIndex - filterCount;
+        if (isDesktop && isNav) {
+          nextIndex = navCount; // ✅ Nav ကနေ အောက်နှိပ်ရင် VN Server ကို ပြန်သွားမယ်
+        } else if (!isDesktop && isNav) {
+          shouldPreventDefault = false;
+        } else if (isCategoryFilter || isStatusFilter) {
+          if (matchCount > 0) {
+            nextIndex = isDesktop ? navCount + filterCount : filterCount;
+          } else {
+            shouldPreventDefault = false;
+          }
+        } else if (isMatchCard) {
+          const currentCardIndex = currentIndex - (isDesktop ? navCount + filterCount : filterCount);
           const currentCard = matchFocusables[currentCardIndex];
           const currentRect = currentCard.getBoundingClientRect();
           
@@ -118,20 +147,20 @@ function App() {
             }
           }
 
-          if (bestMatch !== -1) nextIndex = filterCount + bestMatch;
-          else if (navFocusables.length > 0) nextIndex = filterCount + matchCount;
-          else shouldPreventDefault = false;
+          if (bestMatch !== -1) {
+            nextIndex = (isDesktop ? navCount + filterCount : filterCount) + bestMatch;
+          } else {
+            if (!isDesktop && navCount > 0) {
+              nextIndex = filterCount + matchCount;
+            } else {
+              shouldPreventDefault = false;
+            }
+          }
         }
-        else if (isNav) shouldPreventDefault = false;
       }
       else if (e.key === 'ArrowUp') {
-        if (isNav) {
-          if (matchCount > 0) nextIndex = filterCount + matchCount - 1;
-          else if (filterCount > 0) nextIndex = filterCount - 1;
-          else shouldPreventDefault = false;
-        } 
-        else if (isMatchCard) {
-          const currentCardIndex = currentIndex - filterCount;
+        if (isMatchCard) {
+          const currentCardIndex = currentIndex - (isDesktop ? navCount + filterCount : filterCount);
           const currentCard = matchFocusables[currentCardIndex];
           const currentRect = currentCard.getBoundingClientRect();
           
@@ -163,25 +192,44 @@ function App() {
             }
           }
 
-          if (bestMatch !== -1) nextIndex = filterCount + bestMatch;
-          else if (statusCount > 0) {
-            const colIndex = currentCardIndex % 4; 
-            nextIndex = categoryCount + Math.min(colIndex, statusCount - 1);
-          } else shouldPreventDefault = false;
+          if (bestMatch !== -1) {
+            nextIndex = (isDesktop ? navCount + filterCount : filterCount) + bestMatch;
+          } else {
+            if (isDesktop) {
+              nextIndex = navCount; // ✅ Match Card အပေါ်ဆုံးတန်းကနေ Arrow Up နှိပ်ရင် VN Server ကို ပြန်သွားမယ်
+            } else {
+              const colIndex = currentCardIndex % 4; 
+              nextIndex = 2 + Math.min(colIndex, 2);
+            }
+          }
+        } 
+        else if (isDesktop && isCategoryFilter) {
+          const catIndex = currentIndex - navCount;
+          nextIndex = Math.min(catIndex, navCount - 1); // ✅ VN Server (0) -> Live Events (0), Myanmar Sound (1) -> Categories (1)
+        } 
+        else if (isDesktop && isStatusFilter) {
+          nextIndex = 0; // ✅ Status Filter ကနေ Arrow Up နှိပ်ရင် Live Events ကို သွားမယ်
         }
-        else if (isStatusFilter) {
-          const statusIndex = currentIndex - categoryCount;
+        else if (!isDesktop && isStatusFilter) {
+          const statusIndex = currentIndex - 2;
           if (statusIndex === 0 || statusIndex === 1) nextIndex = 0;
           else nextIndex = 1;
         } 
-        else if (isCategoryFilter) shouldPreventDefault = false;
+        else if (!isDesktop && isCategoryFilter) {
+          shouldPreventDefault = false;
+        }
+        else if (isNav) {
+          shouldPreventDefault = false;
+        }
       } 
       else if (e.key === 'Enter' || e.key === 'Ok' || e.key === ' ') {
         e.preventDefault();
         currentElement.click();
         return;
       } 
-      else return;
+      else {
+        return;
+      }
 
       if (shouldPreventDefault && nextIndex >= 0 && nextIndex < allFocusables.length) {
         e.preventDefault();
@@ -193,9 +241,9 @@ function App() {
     window.addEventListener('keydown', handleKeyDown);
     if (!hasInitialFocused.current) {
       setTimeout(() => {
-        const firstFocusable = document.querySelector('.focusable-item');
-        if (firstFocusable) {
-          firstFocusable.focus();
+        const filterFocusables = Array.from(document.querySelectorAll('.filters-wrapper .focusable-item'));
+        if (filterFocusables.length > 0) {
+          filterFocusables[0].focus(); // ✅ Webpage ဝင်ဝင်ချင်း VN Server မှာ Focus ရောက်အောင်
           hasInitialFocused.current = true;
         }
       }, 500);
@@ -203,18 +251,16 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedMatch, selectedCategory, selectedStatus, matches.length]);
 
-  // 🎯 ၂။ Data Fetching Logic (Category ပြောင်းမှသာ Loading ပြမယ်)
+  // 🎯 ၂။ Data Fetching Logic
   useEffect(() => {
     let isCancelled = false;
 
     const fetchData = async (isInitialCheck, isCategoryChanged = false) => {
-      // Initial Check (App ဝင်ဝင်ချင်း သို့မဟုတ် Retry)
       if (isInitialCheck) {
         setInitialCheck(true);
         setConnectionError(false);
       }
       
-      // ✅ Category ပြောင်းရင်သာ Loading ပြမယ်
       if (isCategoryChanged && !isInitialCheck) {
         setLoading(true);
       }
@@ -263,7 +309,6 @@ function App() {
         }
       })();
 
-      // 5 စက္ကန့် စောင့်ဆိုင်းမှု (Initial Check ဖြစ်မှသာ)
       if (isInitialCheck) {
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
@@ -288,7 +333,6 @@ function App() {
             hasLoadedOnce.current = true;
           }
           
-          // ✅ Category ပြောင်းတာဆိုရင် Loading ကို ပိတ်မယ်
           if (isCategoryChanged && !isInitialCheck) {
             setLoading(false);
           }
@@ -304,24 +348,19 @@ function App() {
       }
     };
 
-    // ✅ Category ပြောင်း/မပြောင်း စစ်ဆေးမယ်
     const isCategoryChanged = prevCategoryRef.current !== selectedCategory;
     
-    // ပထမဆုံး Load (သို့) Retry ဖြစ်ရင် isInitialCheck = true
     if (!hasLoadedOnce.current) {
       fetchData(true, false);
     } else {
-      // ✅ Category ပြောင်းရင် isCategoryChanged = true, မပြောင်းရင် false
       fetchData(false, isCategoryChanged);
     }
     
-    // ✅ Category ပြောင်းပြီးရင် prevCategory ကို update လုပ်မယ်
     prevCategoryRef.current = selectedCategory;
 
-    // 15 စက္ကန့်တစ်ခါ Background Update (Category မပြောင်းတဲ့အတွက် Loading မပြဘူး)
     const interval = setInterval(() => {
       if (hasLoadedOnce.current && !connectionError) {
-        fetchData(false, false); // isCategoryChanged = false
+        fetchData(false, false);
       }
     }, 15000);
 
@@ -392,7 +431,6 @@ function App() {
     return true;
   });
 
-  // ✅ ၁။ Initial Loading Screen (App ဝင်ဝင်ချင်း 5 စက္ကန့် ပြမယ်)
   if (initialCheck) {
     return (
       <div className="loading-container">
@@ -402,15 +440,14 @@ function App() {
     );
   }
 
-  // ✅ ၂။ Connection Error Screen (VPN မရှိရင် ပြမယ်)
   if (connectionError) {
     return (
       <div className="connection-error-container">
         <div className="error-content">
-          <div className="error-icon"></div>
+          <div className="error-icon">🌐</div>
           <h2 className="error-title">ချိတ်ဆက်မှု မှားယွင်းနေသည်</h2>
           <p className="error-message">
-            ကျေးူးပြု၍ VPN အသုံးပြုပါ<br />
+            ကျေးဇူးပြု၍ VPN အသုံးပြုပါ<br />
             သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ
           </p>
           <button className="retry-button" onClick={handleRetry}>
@@ -421,11 +458,10 @@ function App() {
     );
   }
 
-  // ✅ ၃။ Main Homepage
   return (
     <div className="app">
       <Header />
-      
+      <BottomNav active={activeNav} onSelect={setActiveNav} />
       <div className="filters-wrapper">
         <CategoryFilter 
           categories={[
@@ -443,7 +479,6 @@ function App() {
       </div>
       
       <main className="main-content">
-        {/* ✅ Category ပြောင်းရင်သာ Loading ပြမယ် */}
         {loading ? (
           <div className="loading"><div className="spinner"></div><p>Loading matches...</p></div>
         ) : filteredMatches.length === 0 ? (
@@ -461,8 +496,6 @@ function App() {
           </div>
         )}
       </main>
-      
-      <BottomNav active="live" onSelect={() => {}} />
 
       {selectedMatch && (
         <VideoPlayer 
