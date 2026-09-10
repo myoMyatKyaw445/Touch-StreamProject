@@ -457,9 +457,9 @@ function App() {
       </div>
     );
   }
-
+   const isTV = typeof window !== 'undefined' && window.screen.width > 1000;
   return (
-    <div className="app">
+    <div className={`app ${isTV ? 'tv-layout' : ''}`}>
       <Header />
       <BottomNav active={activeNav} onSelect={setActiveNav} />
       <div className="filters-wrapper">

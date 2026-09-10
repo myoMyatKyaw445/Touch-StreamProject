@@ -1285,3 +1285,31 @@ body {
   }
 }
 
+/* ========================================== */
+/* BULLETPROOF TV LAYOUT FIX */
+/* ========================================== */
+
+/* tv-layout Class ရောက်ရင် အောက်ပါအတိုင်း အတင်းအကျပ် ပြမယ် */
+
+/* ၁။ Bottom Nav ကို ဖျောက်မယ် */
+.tv-layout .bottom-nav {
+  display: none !important;
+}
+
+/* ၂။ Top Nav ကို ပြမယ် */
+.tv-layout .top-nav {
+  display: flex !important;
+}
+
+/* ၃။ Match Cards ကို Grid ပြမယ် (Zoom ဘယ်လောက်ဝင်ဝင် အလုပ်လုပ်မယ်) */
+.tv-layout .matches-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 15px !important;
+}
+
+/* ၄။ Main Content Padding ကို ချိန်မယ် */
+.tv-layout .main-content {
+  padding-top: 250px !important;
+}
+
