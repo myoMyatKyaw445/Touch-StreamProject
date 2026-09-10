@@ -1267,3 +1267,30 @@ body {
     transform: scale(1.1);
   }
 }
+
+/* ========================================== */
+/* GLOBAL FIX FOR ALL LARGE SCREENS (Lowered Breakpoint) */
+/* ========================================== */
+
+/* 768px (Tablet/TV) အထက်ဆိုရင် Top Nav ပြမယ် */
+@media screen and (min-width: 768px) {
+  .bottom-nav {
+    display: none !important;
+  }
+  
+  .top-nav {
+    display: flex !important;
+  }
+}
+
+/* 1024px (Laptop/TV) အထက်ဆိုရင် Top Nav ပြမယ် */
+@media screen and (min-width: 1024px) {
+  .bottom-nav {
+    display: none !important;
+  }
+  
+  .top-nav {
+    display: flex !important;
+  }
+}
+
