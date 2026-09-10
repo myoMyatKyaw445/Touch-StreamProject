@@ -1260,10 +1260,22 @@ body {
 }
 
 /* ========================================== */
-/* GLOBAL FIX FOR ALL LARGE SCREENS */
+/* EMERGENCY FIX: SMART GRID & NAV FOR TV */
 /* ========================================== */
 
-@media screen and (min-width: 900px) {  /* ✅ 1024px အစား 900px */
+/* ၁။ Smart Grid: Screen Size ပေါ်မူတည်ပြီး Column အလိုအလျောက် ချိန်ပေးမယ် */
+/* (TV Zoom ဝင်ရင်  တန်း၊ မဝင်ရင် ၄-၅ တန်း အလိုအလျောက် ဖြစ်သွားပါမယ်) */
+@media screen and (min-width: 481px) {
+  .matches-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+    gap: 15px !important;
+  }
+}
+
+/* ၂။ Nav Fix: 768px (Tablet/TV) အထက်ဆို Top Nav ပြမယ် */
+/* (TV Zoom ဝင်ရင်တောင် 768px ကျော်တဲ့အတွက် Top Nav ပေါ်လာပါမယ်) */
+@media screen and (min-width: 768px) {
   .bottom-nav {
     display: none !important;
   }
