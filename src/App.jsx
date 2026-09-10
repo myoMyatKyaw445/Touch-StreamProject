@@ -39,13 +39,15 @@ function App() {
     }
   }, []);
 
-  // 🎯 ၁။ Keyboard Navigation Logic (Desktop Top Nav + Mobile Bottom Nav supported)
+  //  ၁။ Keyboard Navigation Logic (Desktop Top Nav + Mobile Bottom Nav supported)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (window.innerWidth < 768 || selectedMatch) return;
 
-      const isDesktop = window.innerWidth >= 1024;
-      const navFocusables = Array.from(document.querySelectorAll(isDesktop ? '.top-nav .focusable-item' : '.bottom-nav .focusable-item'));
+      // ✅ TV ဖြစ်ရင် screen.width က 1000 ကျော်နေမယ် (Browser Zoom ဝင်နေရင်တောင် မှန်ကန်စွာ အလုပ်လုပ်မယ်)
+      const isDesktopOrTV = window.innerWidth >= 1024 || (typeof window !== 'undefined' && window.screen.width > 1000);
+      
+      const navFocusables = Array.from(document.querySelectorAll(isDesktopOrTV ? '.top-nav .focusable-item' : '.bottom-nav .focusable-item'));
       const filterFocusables = Array.from(document.querySelectorAll('.filters-wrapper .focusable-item'));
       const matchFocusables = Array.from(document.querySelectorAll('.matches-list .focusable-item'));
       
@@ -56,8 +58,8 @@ function App() {
       const matchCount = matchFocusables.length;
 
       let allFocusables;
-      if (isDesktop) {
-        // Desktop: Nav (Top) -> Filters -> Matches
+      if (isDesktopOrTV) {
+        // Desktop/TV: Nav (Top) -> Filters -> Matches
         allFocusables = [...navFocusables, ...filterFocusables, ...matchFocusables];
       } else {
         // Mobile/Tablet: Filters -> Matches -> Nav (Bottom)
@@ -69,8 +71,8 @@ function App() {
 
       if (currentIndex === -1) {
         if (allFocusables.length > 0) {
-          if (isDesktop) {
-            allFocusables[navCount].focus(); // Desktop တွင် VN Server ကို အရင် Focus ပေးမယ်
+          if (isDesktopOrTV) {
+            allFocusables[navCount].focus(); // Desktop/TV တွင် VN Server ကို အရင် Focus ပေးမယ်
           } else {
             allFocusables[0].focus(); // Mobile တွင် ပထမဆုံး Filter ကို Focus ပေးမယ်
           }
@@ -83,7 +85,7 @@ function App() {
       
       let isNav, isCategoryFilter, isStatusFilter, isMatchCard;
 
-      if (isDesktop) {
+      if (isDesktopOrTV) {
         isNav = currentIndex < navCount;
         isCategoryFilter = currentIndex >= navCount && currentIndex < navCount + 2;
         isStatusFilter = currentIndex >= navCount + 2 && currentIndex < navCount + filterCount;
@@ -104,18 +106,18 @@ function App() {
         else shouldPreventDefault = false;
       } 
       else if (e.key === 'ArrowDown') {
-        if (isDesktop && isNav) {
+        if (isDesktopOrTV && isNav) {
           nextIndex = navCount; // ✅ Nav ကနေ အောက်နှိပ်ရင် VN Server ကို ပြန်သွားမယ်
-        } else if (!isDesktop && isNav) {
+        } else if (!isDesktopOrTV && isNav) {
           shouldPreventDefault = false;
         } else if (isCategoryFilter || isStatusFilter) {
           if (matchCount > 0) {
-            nextIndex = isDesktop ? navCount + filterCount : filterCount;
+            nextIndex = isDesktopOrTV ? navCount + filterCount : filterCount;
           } else {
             shouldPreventDefault = false;
           }
         } else if (isMatchCard) {
-          const currentCardIndex = currentIndex - (isDesktop ? navCount + filterCount : filterCount);
+          const currentCardIndex = currentIndex - (isDesktopOrTV ? navCount + filterCount : filterCount);
           const currentCard = matchFocusables[currentCardIndex];
           const currentRect = currentCard.getBoundingClientRect();
           
@@ -148,9 +150,9 @@ function App() {
           }
 
           if (bestMatch !== -1) {
-            nextIndex = (isDesktop ? navCount + filterCount : filterCount) + bestMatch;
+            nextIndex = (isDesktopOrTV ? navCount + filterCount : filterCount) + bestMatch;
           } else {
-            if (!isDesktop && navCount > 0) {
+            if (!isDesktopOrTV && navCount > 0) {
               nextIndex = filterCount + matchCount;
             } else {
               shouldPreventDefault = false;
@@ -160,7 +162,7 @@ function App() {
       }
       else if (e.key === 'ArrowUp') {
         if (isMatchCard) {
-          const currentCardIndex = currentIndex - (isDesktop ? navCount + filterCount : filterCount);
+          const currentCardIndex = currentIndex - (isDesktopOrTV ? navCount + filterCount : filterCount);
           const currentCard = matchFocusables[currentCardIndex];
           const currentRect = currentCard.getBoundingClientRect();
           
@@ -193,9 +195,9 @@ function App() {
           }
 
           if (bestMatch !== -1) {
-            nextIndex = (isDesktop ? navCount + filterCount : filterCount) + bestMatch;
+            nextIndex = (isDesktopOrTV ? navCount + filterCount : filterCount) + bestMatch;
           } else {
-            if (isDesktop) {
+            if (isDesktopOrTV) {
               nextIndex = navCount; // ✅ Match Card အပေါ်ဆုံးတန်းကနေ Arrow Up နှိပ်ရင် VN Server ကို ပြန်သွားမယ်
             } else {
               const colIndex = currentCardIndex % 4; 
@@ -203,19 +205,19 @@ function App() {
             }
           }
         } 
-        else if (isDesktop && isCategoryFilter) {
+        else if (isDesktopOrTV && isCategoryFilter) {
           const catIndex = currentIndex - navCount;
           nextIndex = Math.min(catIndex, navCount - 1); // ✅ VN Server (0) -> Live Events (0), Myanmar Sound (1) -> Categories (1)
         } 
-        else if (isDesktop && isStatusFilter) {
+        else if (isDesktopOrTV && isStatusFilter) {
           nextIndex = 0; // ✅ Status Filter ကနေ Arrow Up နှိပ်ရင် Live Events ကို သွားမယ်
         }
-        else if (!isDesktop && isStatusFilter) {
+        else if (!isDesktopOrTV && isStatusFilter) {
           const statusIndex = currentIndex - 2;
           if (statusIndex === 0 || statusIndex === 1) nextIndex = 0;
           else nextIndex = 1;
         } 
-        else if (!isDesktop && isCategoryFilter) {
+        else if (!isDesktopOrTV && isCategoryFilter) {
           shouldPreventDefault = false;
         }
         else if (isNav) {
@@ -447,7 +449,7 @@ function App() {
           <div className="error-icon">🌐</div>
           <h2 className="error-title">ချိတ်ဆက်မှု မှားယွင်းနေသည်</h2>
           <p className="error-message">
-            ကျေးဇူးပြု၍ VPN အသုံးပြုပါ<br />
+            ကျေးဇူးပြု VPN အသုံးပြုပါ<br />
             သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ
           </p>
           <button className="retry-button" onClick={handleRetry}>
@@ -457,7 +459,10 @@ function App() {
       </div>
     );
   }
-   const isTV = typeof window !== 'undefined' && window.screen.width > 1000;
+
+  // TV ဖြစ်/မဖြစ် စစ်ဆေးမယ် (Browser Zoom ဝင်နေရင်တောင် Physical Resolution ကို ပြပါတယ်)
+  const isTV = typeof window !== 'undefined' && window.screen.width > 1000;
+
   return (
     <div className={`app ${isTV ? 'tv-layout' : ''}`}>
       <Header />
