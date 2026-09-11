@@ -1315,17 +1315,16 @@ body {
 /* SUBTLE & CIRCULAR FOCUS STYLES FOR TV */
 /* ========================================== */
 
-/* ၅။ General Focus (မြင်ရရုံ၊ လှရုံလောက်သာ) */
+/* ။ General Focus (မြင်ရရုံ၊ လှရုံလောက်သာ) */
 .tv-layout .focusable-item:focus {
   outline: none !important;
-  transform: scale(1.03) !important; /* အရမ်းမကြီးအောင် လျှော့ထား */
-  z-index: 100 !important;
-  /* Border 2px + 3px နဲ့ Shadow 8px သာပေးထား */
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #667eea, 0 0 8px rgba(102, 126, 234, 0.5) !important;
+  transform: scale(1.01) !important; /* အရမ်းမကြီးအောင် လျှော့ထား */
+  z-index: 10 !important; /* အပေါ်က Header/Filter တွေကို မဖုံးမိအောင် z-index လျှော့ထား */
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px #667eea !important;
   background: rgba(102, 126, 234, 0.15) !important;
 }
 
-/* ၆။ Category Button (VN Server / မြန်မာအသံ) - လေးထောင့်မဖြစ်အောင် အဝိုင်းသက်သက် */
+/* ။ Category Button (VN Server / မြန်မာအသံ) - လေးထောင့်မဖြစ်အောင် အဝိုင်းသက်သက် */
 .tv-layout .category-btn.focusable-item:focus {
   background: transparent !important;
   border: none !important;
@@ -1336,31 +1335,37 @@ body {
 .tv-layout .category-btn.focusable-item:focus .category-icon {
   background: rgba(255, 255, 255, 0.2) !important;
   border: 2px solid #ffffff !important;
-  border-radius: 50% !important; /* ✅ အဝိုင်းသက်သက် ဖြစ်အောင် အတင်းအကျပ် မှာထား */
+  border-radius: 50% !important; 
   box-shadow: 0 0 0 3px #667eea !important;
-  transform: scale(1.05) !important;
-}
-
-/* ၇။ Status Filter Focus (အဝိုင်းဝိုင်း Pill Shape) */
-.tv-layout .status-btn.focusable-item:focus {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.4)) !important;
-  border: 2px solid #ffffff !important;
-  box-shadow: 0 0 0 3px #667eea, 0 0 8px rgba(102, 126, 234, 0.6) !important;
   transform: scale(1.03) !important;
 }
 
-/* ၈။ Match Card Focus */
+/* ၇။ Status Filter Focus */
+.tv-layout .status-btn.focusable-item:focus {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.4)) !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 0 0 3px #667eea !important;
+  transform: scale(1.02) !important;
+}
+
+/* ၈။ Match Card Focus (TV အတွက် အထူးချိန်ညှိထားသည်) */
 .tv-layout .match-card.focusable-item:focus {
   border: 2px solid #ffffff !important;
-  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #667eea, 0 0 12px rgba(102, 126, 234, 0.6) !important;
-  transform: scale(1.02) !important;
+  box-shadow: 0 0 0 3px #667eea !important; /* အရိပ်ကြီး မပျံ့အောင် တင်းတင်းကျပ်ကျပ် ပဲထားမယ် */
+  transform: scale(1.01) !important; /* Box အရွယ်အစား သိပ်မကြီးလာအောင် လျှော့ထား */
+  z-index: 10 !important; /* အပေါ်ကို တက်မဖုံးအောင် z-index လျှော့ထား */
   background: rgba(102, 126, 234, 0.1) !important;
+}
+
+/* ✅ အပေါ်ကို အရိပ်ကြီး တက်ဖုံးတဲ့ ပြဿနာကို ြေရှင်းရန် ::before ကို ပိတ်ထားမယ် */
+.tv-layout .match-card.focusable-item:focus::before {
+  display: none !important;
 }
 
 /* ၉။ Top Nav Focus */
 .tv-layout .top-nav .nav-item:focus {
   background: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #667eea, 0 0 8px rgba(102, 126, 234, 0.6) !important;
-  transform: scale(1.05) !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px #667eea !important;
+  transform: scale(1.03) !important;
   border-radius: 8px !important;
 }
