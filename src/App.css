@@ -1294,9 +1294,12 @@ body {
   display: none !important;
 }
 
-/* ၂။ Top Nav ကို ပြမယ် */
+/* ၂။ Top Nav ကို Header အတွင်းမှာ နည်းနည်း ချပြီး ပြမယ် */
 .tv-layout .top-nav {
   display: flex !important;
+  top: 10px !important; /* ✅ အပေါ်ကနေ 10px ျမယ် */
+  height: 50px !important; /* ✅ height ကို 60px အစား 50px လျှော့မယ် */
+  align-items: center !important;
 }
 
 /* ၃။ Match Cards ကို Grid ပြမယ် */
