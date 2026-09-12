@@ -1,31 +1,26 @@
-exports.handler = async (event, context) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Content-Type': 'application/json'
-  };
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
-
-  const roomNum = event.queryStringParameters?.roomNum;
-
-  if (!roomNum) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: "roomNum is required" }) };
-  }
-
+export const handler = async (event, context) => {
   try {
+    const roomNum = event.queryStringParameters?.roomNum;
+
+    if (!roomNum) {
+      return {
+        statusCode: 400,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({ error: "roomNum is required" })
+      };
+    }
+
     const detailUrl = `https://json.ncctrials.com/room/${roomNum}/detail.json`;
     const response = await fetch(detailUrl, {
       headers: { 
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer': 'https://yyzblive.com/'
+        'Accept': '*/*'
       }
     });
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`Upstream API failed with status: ${response.status}`);
+    }
 
     const text = await response.text();
     let cleanJson = text;
@@ -43,19 +38,24 @@ exports.handler = async (event, context) => {
     const data = JSON.parse(cleanJson);
 
     if (data.code === 200 && data.data && data.data.stream) {
-      return { 
-        statusCode: 200, 
-        headers, 
-        body: JSON.stringify({ success: true, stream: data.data.stream }) 
+      return {
+        statusCode: 200,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({ success: true, stream: data.data.stream })
       };
     } else {
-      return { statusCode: 404, headers, body: JSON.stringify({ success: false, message: "No stream data" }) };
+      return {
+        statusCode: 404,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({ success: false, message: "No stream data" })
+      };
     }
   } catch (error) {
-    return { 
-      statusCode: 500, 
-      headers, 
-      body: JSON.stringify({ success: false, error: error.message }) 
+    console.error("China Stream Function Error:", error);
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ success: false, error: error.message })
     };
   }
 };
