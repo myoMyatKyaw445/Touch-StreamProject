@@ -16,27 +16,32 @@ export default function MatchCard({ match, category, onClick }) {
             <img src={homeTeam.logo} alt={homeTeam.name} className="team-logo" onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }} />
             <div className="team-logo-fallback" style={{display: 'none'}}>⚽</div>
           </div>
-          {/* ✅ Team Name နဲ့ Score ကို .team-info div ထဲ ထည့်လိုက်ပါ */}
           <div className="team-info">
             <span className="team-name">{homeTeam.name}</span>
             {matchStatus && category === 'myanmarsound' && <span className="team-score">{homeScore ?? 0}</span>}
           </div>
         </div>
-        <div className="vs-section"><span className="vs-text">VS</span></div>
+        
+        <div className="vs-section">
+          <span className="vs-text">VS</span>
+        </div>
+        
         <div className="team away-team">
-  <div className="team-logo-wrapper">
-    <img src={awayTeam.logo} alt={awayTeam.name} className="team-logo" onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }} />
-    <div className="team-logo-fallback" style={{display: 'none'}}>⚽</div>
-  </div>
-  {/* ✅ Away Team မှာ Score ကို အရင်ထားပြီး Team Name ကို နောက်ထားမယ် */}
-  <div className="team-info" style={{flexDirection: 'row-reverse'}}>
-    <span className="team-name">{awayTeam.name}</span>
-    {matchStatus && category === 'myanmarsound' && <span className="team-score">{awayScore ?? 0}</span>}
-  </div>
-</div>
+          <div className="team-logo-wrapper">
+            <img src={awayTeam.logo} alt={awayTeam.name} className="team-logo" onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }} />
+            <div className="team-logo-fallback" style={{display: 'none'}}>⚽</div>
+          </div>
+          <div className="team-info" style={{flexDirection: 'row-reverse'}}>
+            <span className="team-name">{awayTeam.name}</span>
+            {matchStatus && category === 'myanmarsound' && <span className="team-score">{awayScore ?? 0}</span>}
+          </div>
+        </div>
       </div>
+      
       <div className="league-section">
-        <div className="league-info"><span className="league-name">{league}</span></div>
+        <div className="league-info">
+          <span className="league-name">{league}</span>
+        </div>
         {matchStatus && <span className="live-badge"> Live</span>}
       </div>
     </div>

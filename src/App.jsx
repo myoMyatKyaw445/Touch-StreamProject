@@ -26,11 +26,147 @@ function App() {
     { id: 'upcoming', name: 'Upcoming', count: 0 },
   ]);
 
-  const hasInitialFocused = useRef(false);
   const lastFocusedMatchId = useRef(null);
   const hasLoadedOnce = useRef(false);
   const prevCategoryRef = useRef('vnserver');
 
+  // ✅ Perfect Section-based Navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (selectedMatch) return;
+
+      const validKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '];
+      if (!validKeys.includes(e.key)) return;
+
+      // Section အလိုက် Focusable Items များကို ရှာဖွေခြင်း
+      const topNavItems = Array.from(document.querySelectorAll('.top-nav .focusable-item'));
+      const categoryItems = Array.from(document.querySelectorAll('.category-filter .focusable-item'));
+      const statusItems = Array.from(document.querySelectorAll('.status-filter .focusable-item'));
+      const matchCards = Array.from(document.querySelectorAll('.matches-list .focusable-item'));
+
+      const currentElement = document.activeElement;
+      
+      // ဘယ် Section မှာ ရောက်နေလဲ ဆုံးဖြတ်ခြင်း
+      let currentSection = null;
+      let currentIndexInSection = -1;
+
+      if (topNavItems.includes(currentElement)) {
+        currentSection = 'topNav';
+        currentIndexInSection = topNavItems.indexOf(currentElement);
+      } else if (categoryItems.includes(currentElement)) {
+        currentSection = 'category';
+        currentIndexInSection = categoryItems.indexOf(currentElement);
+      } else if (statusItems.includes(currentElement)) {
+        currentSection = 'status';
+        currentIndexInSection = statusItems.indexOf(currentElement);
+      } else if (matchCards.includes(currentElement)) {
+        currentSection = 'matches';
+        currentIndexInSection = matchCards.indexOf(currentElement);
+      }
+
+      // ာမှ Focus မရောက်သေးရင် Top Nav ပထမဆုံး Item ကို Focus
+      if (!currentSection) {
+        topNavItems[0]?.focus();
+        return;
+      }
+
+      let targetElement = null;
+
+      if (e.key === 'ArrowRight') {
+        // ဘယ် Section မဆို ညာဘက်ကို သွားနိုင်သည်
+        if (currentSection === 'topNav' && currentIndexInSection < topNavItems.length - 1) {
+          targetElement = topNavItems[currentIndexInSection + 1];
+        } else if (currentSection === 'category' && currentIndexInSection < categoryItems.length - 1) {
+          targetElement = categoryItems[currentIndexInSection + 1];
+        } else if (currentSection === 'status' && currentIndexInSection < statusItems.length - 1) {
+          targetElement = statusItems[currentIndexInSection + 1];
+        } else if (currentSection === 'matches' && currentIndexInSection < matchCards.length - 1) {
+          targetElement = matchCards[currentIndexInSection + 1];
+        }
+      } 
+      else if (e.key === 'ArrowLeft') {
+        // ဘယ် Section မဆို ဘယ်ဘက်ကို သွားနိုင်သည်
+        if (currentSection === 'topNav' && currentIndexInSection > 0) {
+          targetElement = topNavItems[currentIndexInSection - 1];
+        } else if (currentSection === 'category' && currentIndexInSection > 0) {
+          targetElement = categoryItems[currentIndexInSection - 1];
+        } else if (currentSection === 'status' && currentIndexInSection > 0) {
+          targetElement = statusItems[currentIndexInSection - 1];
+        } else if (currentSection === 'matches' && currentIndexInSection > 0) {
+          targetElement = matchCards[currentIndexInSection - 1];
+        }
+      } 
+      else if (e.key === 'ArrowDown') {
+        // အောက်ကို ဆင်းသက်ခြင်း (Section တစ်ခုမှ တစ်ခုသို့)
+        if (currentSection === 'topNav') {
+          // Top Nav ကနေ အောက်ဆင်းရင် Category (VN Server) ကို သွားမယ်
+          targetElement = categoryItems[0];
+        } else if (currentSection === 'category') {
+          // Category ကနေ အောက်ဆင်းရင် Status (All) ကို သွားမယ်
+          targetElement = statusItems[0];
+        } else if (currentSection === 'status') {
+          // Status ကနေ အောက်ဆင်းရင် ပထမဆုံး Match Card ကို သွားမယ်
+          targetElement = matchCards[0];
+        } else if (currentSection === 'matches') {
+          // Match Cards အတွင်းမှာ အောက်ဆင်းရင် 4 တန်း (Grid) ယူဆပြီး သွားမယ်
+          const columns = 4;
+          const nextIndex = currentIndexInSection + columns;
+          if (nextIndex < matchCards.length) {
+            targetElement = matchCards[nextIndex];
+          }
+        }
+      } 
+      else if (e.key === 'ArrowUp') {
+        // အပေါ်ကို ပြန်တက်ခြင်း (Section တစ်ခုမှ တစ်ခုသို့)
+        if (currentSection === 'matches') {
+          // Match Cards ကနေ အပေါ်တက်ရင် Status ကို ပြန်သွားမယ်
+          // လက်ရှိ Card ရဲ့ Column အနေအထားအရ Status မှာ ဘယ်ဟာနဲ့ ညှိမလဲ
+          const columns = 4;
+          const currentColumn = currentIndexInSection % columns;
+          // Status မှာ 3 ခုပဲရှိတဲ့အတွက် 0, 1, 2 အထိပဲ ရမယ်
+          const targetStatusIndex = Math.min(currentColumn, statusItems.length - 1);
+          targetElement = statusItems[targetStatusIndex];
+        } else if (currentSection === 'status') {
+          // Status ကနေ အပေါ်တက်ရင် Category ကို ပြန်သွားမယ်
+          const targetCategoryIndex = Math.min(currentIndexInSection, categoryItems.length - 1);
+          targetElement = categoryItems[targetCategoryIndex];
+        } else if (currentSection === 'category') {
+          // Category ကနေ အပေါ်တက်ရင် Top Nav ကို ပြန်သွားမယ်
+          const targetNavIndex = Math.min(currentIndexInSection, topNavItems.length - 1);
+          targetElement = topNavItems[targetNavIndex];
+        }
+        // Top Nav မှာဆိုရင် အပေါ်ကို ထပ်မတက်နိုင်တော့
+      } 
+      else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        currentElement.click();
+        return;
+      }
+
+      if (targetElement) {
+        e.preventDefault();
+        targetElement.focus();
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Page ဖွင့်ဖွင့်ချင်း Top Nav ပထမဆုံး Item (Live Events) မှာ Focus
+    const timer = setTimeout(() => {
+      const firstNavItem = document.querySelector('.top-nav .focusable-item');
+      if (firstNavItem) {
+        firstNavItem.focus();
+      }
+    }, 800);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(timer);
+    };
+  }, [selectedMatch, matches.length]);
+
+  // ၂။ Scroll Restoration Logic
   useEffect(() => {
     const mainContent = document.querySelector('.main-content');
     if (mainContent) mainContent.scrollTop = 0;
@@ -39,130 +175,7 @@ function App() {
     }
   }, []);
 
-  // ၁။ Keyboard Navigation Logic (TV/Box အတွက် အထူး Optimize လုပ်ထားသည်)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (window.innerWidth < 768 || selectedMatch) return;
-
-      const isDesktopOrTV = window.innerWidth >= 1024 || (typeof window !== 'undefined' && window.screen.width > 1000);
-      
-      const navFocusables = Array.from(document.querySelectorAll(isDesktopOrTV ? '.top-nav .focusable-item' : '.bottom-nav .focusable-item'));
-      const filterFocusables = Array.from(document.querySelectorAll('.filters-wrapper .focusable-item'));
-      const matchFocusables = Array.from(document.querySelectorAll('.matches-list .focusable-item'));
-      
-      if (filterFocusables.length === 0 && matchFocusables.length === 0) return;
-
-      const navCount = navFocusables.length;
-      const categoryCount = 3;
-      const statusCount = 3;
-      const filterCount = categoryCount + statusCount;
-      const matchCount = matchFocusables.length;
-
-      let allFocusables;
-      if (isDesktopOrTV) {
-        allFocusables = [...navFocusables, ...filterFocusables, ...matchFocusables];
-      } else {
-        allFocusables = [...filterFocusables, ...matchFocusables, ...navFocusables];
-      }
-
-      const currentElement = document.activeElement;
-      const currentIndex = allFocusables.indexOf(currentElement);
-
-      if (currentIndex === -1) {
-        if (allFocusables.length > 0) {
-          const targetIndex = isDesktopOrTV ? navCount : 0;
-          allFocusables[targetIndex].focus();
-        }
-        return;
-      }
-
-      let nextIndex = currentIndex;
-      let shouldPreventDefault = true;
-      let isNav, isCategoryFilter, isStatusFilter, isMatchCard;
-
-      if (isDesktopOrTV) {
-        isNav = currentIndex < navCount;
-        isCategoryFilter = currentIndex >= navCount && currentIndex < navCount + categoryCount;
-        isStatusFilter = currentIndex >= navCount + categoryCount && currentIndex < navCount + filterCount;
-        isMatchCard = currentIndex >= navCount + filterCount;
-      } else {
-        isCategoryFilter = currentIndex < categoryCount;
-        isStatusFilter = currentIndex >= categoryCount && currentIndex < filterCount;
-        isMatchCard = currentIndex >= filterCount && currentIndex < filterCount + matchCount;
-        isNav = currentIndex >= filterCount + matchCount;
-      }
-
-      if (e.key === 'ArrowRight') {
-        if (currentIndex < allFocusables.length - 1) nextIndex = currentIndex + 1;
-        else shouldPreventDefault = false;
-      } else if (e.key === 'ArrowLeft') {
-        if (currentIndex > 0) nextIndex = currentIndex - 1;
-        else shouldPreventDefault = false;
-      } else if (e.key === 'ArrowDown') {
-        if (isDesktopOrTV && isNav) {
-          nextIndex = navCount;
-        } else if (!isDesktopOrTV && isNav) {
-          shouldPreventDefault = false;
-        } else if (isCategoryFilter || isStatusFilter) {
-          nextIndex = isDesktopOrTV ? navCount + filterCount : filterCount;
-        } else if (isMatchCard) {
-          // ✅ TV အတွက် getBoundingClientRect ကို ဖျက်ပြီး ရိုးရှင်းတဲ့ Index တွက်နည်းကို သုံးပါသည် (Performance အတွက်)
-          const columns = isDesktopOrTV ? 4 : 2; 
-          if (currentIndex + columns < allFocusables.length) {
-            nextIndex = currentIndex + columns;
-          } else {
-            shouldPreventDefault = false;
-          }
-        }
-      } else if (e.key === 'ArrowUp') {
-        if (isMatchCard) {
-          // ✅ TV အတွက် getBoundingClientRect ကို ဖျက်ပြီး ရိုးရှင်းတဲ့ Index တွက်နည်းကို သုံးပါသည်
-          const columns = isDesktopOrTV ? 4 : 2;
-          if (currentIndex - columns >= (isDesktopOrTV ? navCount + filterCount : filterCount)) {
-            nextIndex = currentIndex - columns;
-          } else {
-            nextIndex = isDesktopOrTV ? navCount : 0;
-          }
-        } else if (isDesktopOrTV && isCategoryFilter) {
-          nextIndex = 0;
-        } else if (isDesktopOrTV && isStatusFilter) {
-          nextIndex = 0;
-        } else if (!isDesktopOrTV && isStatusFilter) {
-          nextIndex = 0;
-        } else if (!isDesktopOrTV && isCategoryFilter) {
-          shouldPreventDefault = false;
-        } else if (isNav) {
-          shouldPreventDefault = false;
-        }
-      } else if (e.key === 'Enter' || e.key === 'Ok' || e.key === ' ') {
-        e.preventDefault();
-        currentElement.click();
-        return;
-      } else {
-        return;
-      }
-
-      if (shouldPreventDefault && nextIndex >= 0 && nextIndex < allFocusables.length) {
-        e.preventDefault();
-        allFocusables[nextIndex].focus();
-        allFocusables[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    if (!hasInitialFocused.current) {
-      setTimeout(() => {
-        const filterFocusables = Array.from(document.querySelectorAll('.filters-wrapper .focusable-item'));
-        if (filterFocusables.length > 0) {
-          filterFocusables[0].focus();
-          hasInitialFocused.current = true;
-        }
-      }, 500);
-    }
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedMatch, selectedCategory, selectedStatus, matches.length]);
-
-  // ၂။ Data Fetching Logic
+  // ၃။ Data Fetching Logic
   useEffect(() => {
     let isCancelled = false;
 
@@ -171,23 +184,17 @@ function App() {
         setInitialCheck(true);
         setConnectionError(false);
       }
-      
-      if (isCategoryChanged && !isInitialCheck) {
-        setLoading(true);
-      }
+      if (isCategoryChanged && !isInitialCheck) setLoading(true);
 
       const fetchPromise = (async () => {
         try {
           let rawData = [];
-          
           if (selectedCategory === 'chinaserver') {
             const response = await fetch(`/api/china-data?t=${Date.now()}`); 
-            if (!response.ok) throw new Error('Failed to fetch China data from API');
+            if (!response.ok) throw new Error('Failed to fetch China data');
             const jsonData = await response.json();
             if (jsonData.code === 200 && jsonData.data && Array.isArray(jsonData.data.matches)) {
               rawData = jsonData.data.matches;
-            } else {
-              rawData = [];
             }
           } else if (selectedCategory === 'vnserver') {
             const response = await fetch(`https://raw.githubusercontent.com/devxseven/mdata/refs/heads/main/matches.json?t=${Date.now()}`);
@@ -196,7 +203,7 @@ function App() {
             rawData = data.context || [];
           } else if (selectedCategory === 'myanmarsound') {
             const response = await fetch(`/api/fmp-data?t=${Date.now()}`); 
-            if (!response.ok) throw new Error('Failed to fetch FMP data from API');
+            if (!response.ok) throw new Error('Failed to fetch FMP data');
             rawData = await response.json(); 
           }
 
@@ -215,7 +222,6 @@ function App() {
 
             let links = [];
             let tempRoomNum = null; 
-
             if (isChina) {
               if (match.anchors && match.anchors.length > 0) {
                 tempRoomNum = match.anchors[0].anchor?.roomNum || match.anchors[0].uid;
@@ -225,13 +231,9 @@ function App() {
             }
 
             let dateObj;
-            if (typeof rawTime === 'number' && rawTime > 0) {
-              dateObj = new Date(rawTime);
-            } else if (typeof rawTime === 'string' && /^\d{10,}$/.test(rawTime)) {
-              dateObj = new Date(parseInt(rawTime, 10) * 1000);
-            } else {
-              dateObj = new Date(rawTime);
-            }
+            if (typeof rawTime === 'number' && rawTime > 0) dateObj = new Date(rawTime);
+            else if (typeof rawTime === 'string' && /^\d{10,}$/.test(rawTime)) dateObj = new Date(parseInt(rawTime, 10) * 1000);
+            else dateObj = new Date(rawTime);
 
             const myanmarTime = dateObj.toLocaleString('en-US', {
               timeZone: 'Asia/Yangon', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
@@ -259,13 +261,10 @@ function App() {
         }
       })();
 
-      if (isInitialCheck) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second only
-      }
+      if (isInitialCheck) await new Promise(resolve => setTimeout(resolve, 1000));
 
       if (!isCancelled) {
         const result = await fetchPromise;
-        
         if (result.success) {
           setMatches(result.data);
           const liveCount = result.data.filter(m => m.matchStatus).length;
@@ -282,10 +281,7 @@ function App() {
             setInitialCheck(false);
             hasLoadedOnce.current = true;
           }
-          
-          if (isCategoryChanged && !isInitialCheck) {
-            setLoading(false);
-          }
+          if (isCategoryChanged && !isInitialCheck) setLoading(false);
         } else {
           if (isInitialCheck) {
             setInitialCheck(false);
@@ -301,19 +297,13 @@ function App() {
     };
 
     const isCategoryChanged = prevCategoryRef.current !== selectedCategory;
-    
-    if (!hasLoadedOnce.current) {
-      fetchData(true, false);
-    } else {
-      fetchData(false, isCategoryChanged);
-    }
+    if (!hasLoadedOnce.current) fetchData(true, false);
+    else fetchData(false, isCategoryChanged);
     
     prevCategoryRef.current = selectedCategory;
 
     const interval = setInterval(() => {
-      if (hasLoadedOnce.current) {
-        fetchData(false, false);
-      }
+      if (hasLoadedOnce.current) fetchData(false, false);
     }, 15000);
 
     return () => {
@@ -336,14 +326,12 @@ function App() {
       try {
         const response = await fetch(`/api/china-stream?roomNum=${match._roomNum}`);
         const result = await response.json();
-
         if (result.success && result.stream) {
           const newLinks = [];
           if (result.stream.hdM3u8) newLinks.push({ name: "HD Stream (m3u8)", url: result.stream.hdM3u8 });
           if (result.stream.m3u8) newLinks.push({ name: "Standard (m3u8)", url: result.stream.m3u8 });
           if (result.stream.hdFlv) newLinks.push({ name: "HD Stream (FLV)", url: result.stream.hdFlv });
           if (result.stream.flv) newLinks.push({ name: "Standard (FLV)", url: result.stream.flv });
-
           setSelectedMatch(prev => ({ ...prev, links: newLinks }));
         } else {
           setSelectedMatch(prev => ({ ...prev, links: [] }));
@@ -355,15 +343,12 @@ function App() {
     }
   };
 
-  const handleLinkClick = (link) => {
-    setActiveLink(link);
-  };
+  const handleLinkClick = (link) => setActiveLink(link);
 
   const handleClosePlayer = () => {
     setSelectedMatch(null);
     setActiveLink(null);
     window.history.back(); 
-    
     setTimeout(() => {
       if (lastFocusedMatchId.current) {
         const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
@@ -379,7 +364,6 @@ function App() {
     const handlePopState = (event) => {
       const state = event.state;
       const isRoot = !state || state.step === undefined || state.step === null;
-
       if (isRoot) {
         setSelectedMatch(null);
         setActiveLink(null);
@@ -394,7 +378,6 @@ function App() {
         }, 100);
       } 
     };
-
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []); 
@@ -429,13 +412,8 @@ function App() {
         <div className="error-content">
           <div className="error-icon">🌐</div>
           <h2 className="error-title">ချိတ်ဆက်မှု မှားယွင်းနေသည်</h2>
-          <p className="error-message">
-            ကျေးဇူးပြု၍ VPN အသုံးပြုပါ<br />
-            သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ
-          </p>
-          <button className="retry-button" onClick={handleRetry}>
-            🔄 ပြန်လည်စစ်ဆေးပါ
-          </button>
+          <p className="error-message">ကျေးဇူးပြု၍ VPN အသုံးပြုပါ<br />သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ</p>
+          <button className="retry-button" onClick={handleRetry}>🔄 ပြန်လည်စစ်ဆေးပါ</button>
         </div>
       </div>
     );
