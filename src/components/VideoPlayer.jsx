@@ -119,9 +119,9 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
         <div className="links-section">
           <h3>Channels ({links ? links.length : 0})</h3>
           
-          {!links || links.length === 0 ? (
+         {!links || links.length === 0 ? (
             <div className="no-links">
-              <p>No Stream Available</p>
+              <p>⏳ Loading streams... (ကျေးဇူးပြု၍ စောင့်ပါ)</p>
             </div>
           ) : (
             <div className="links-grid">
