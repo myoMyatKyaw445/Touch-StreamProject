@@ -146,7 +146,7 @@ function App() {
       if (targetElement) {
         e.preventDefault();
         targetElement.focus();
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        targetElement.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
       }
     };
 

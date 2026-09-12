@@ -1372,3 +1372,77 @@ body {
   transform: scale(1.03) !important;
   border-radius: 8px !important;
 }
+
+/* ========================================== */
+/* ANDROID TV PERFORMANCE OPTIMIZATIONS */
+/* ========================================== */
+
+/* ၁။ CSS Transitions အကုန်ပိတ်ခြင်း (TV အတွက်) */
+@media (min-width: 1024px) {
+  .focusable-item {
+    transition: none !important;
+    -webkit-transition: none !important;
+    animation: none !important;
+    -webkit-animation: none !important;
+  }
+
+  /* ၂။ Hardware Acceleration ကို အတင်းအကျပ် ဖွင့်ခြင်း */
+  .focusable-item:focus {
+    transform: scale(1.02) !important;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+  }
+
+  /* ၃။ Match Card Focus - ရိုးရှင်းအောင် */
+  .match-card.focusable-item:focus {
+    outline: 3px solid #00c853 !important;
+    outline-offset: -3px;
+    box-shadow: 0 0 20px rgba(0, 200, 83, 0.8) !important;
+    transition: none !important;
+  }
+
+  /* ၄။ Category Button Focus - အလွန်ရိုးရှင်း */
+  .category-btn.focusable-item:focus .category-icon {
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8) !important;
+    transition: none !important;
+  }
+
+  /* ၅။ Status Button Focus */
+  .status-btn.focusable-item:focus {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid #ffffff !important;
+    transition: none !important;
+  }
+
+  /* ။ Nav Item Focus */
+  .top-nav .nav-item:focus,
+  .bottom-nav .nav-item:focus {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transition: none !important;
+  }
+}
+
+/* ၇။ Scroll Behavior ကို အမြန်ဆုံးထားခြင်း */
+.matches-list,
+.main-content,
+.category-filter,
+.status-filter {
+  scroll-behavior: auto !important;
+  -webkit-scroll-behavior: auto !important;
+}
+
+/* ၈။ TV WebView အတွက် Render Optimization */
+@media (min-width: 1024px) {
+  .app,
+  .main-content,
+  .matches-list,
+  .match-card {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: auto;
+  }
+}
