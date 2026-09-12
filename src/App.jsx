@@ -39,7 +39,7 @@ function App() {
     }
   }, []);
 
-  // ၁။ Keyboard Navigation Logic
+  // ၁။ Keyboard Navigation Logic (TV/Box အတွက် အထူး Optimize လုပ်ထားသည်)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (window.innerWidth < 768 || selectedMatch) return;
@@ -70,11 +70,8 @@ function App() {
 
       if (currentIndex === -1) {
         if (allFocusables.length > 0) {
-          if (isDesktopOrTV) {
-            allFocusables[navCount].focus();
-          } else {
-            allFocusables[0].focus();
-          }
+          const targetIndex = isDesktopOrTV ? navCount : 0;
+          allFocusables[targetIndex].focus();
         }
         return;
       }
@@ -107,107 +104,31 @@ function App() {
         } else if (!isDesktopOrTV && isNav) {
           shouldPreventDefault = false;
         } else if (isCategoryFilter || isStatusFilter) {
-          if (matchCount > 0) {
-            nextIndex = isDesktopOrTV ? navCount + filterCount : filterCount;
+          nextIndex = isDesktopOrTV ? navCount + filterCount : filterCount;
+        } else if (isMatchCard) {
+          // ✅ TV အတွက် getBoundingClientRect ကို ဖျက်ပြီး ရိုးရှင်းတဲ့ Index တွက်နည်းကို သုံးပါသည် (Performance အတွက်)
+          const columns = isDesktopOrTV ? 4 : 2; 
+          if (currentIndex + columns < allFocusables.length) {
+            nextIndex = currentIndex + columns;
           } else {
             shouldPreventDefault = false;
-          }
-        } else if (isMatchCard) {
-          const currentCardIndex = currentIndex - (isDesktopOrTV ? navCount + filterCount : filterCount);
-          const currentCard = matchFocusables[currentCardIndex];
-          const currentRect = currentCard.getBoundingClientRect();
-          
-          let bestMatch = -1;
-          let minDistance = Infinity;
-          let nextRowTop = Infinity;
-
-          for (let i = 0; i < matchFocusables.length; i++) {
-            if (i === currentCardIndex) continue;
-            const targetRect = matchFocusables[i].getBoundingClientRect();
-            if (targetRect.top > currentRect.bottom - 10) { 
-              if (targetRect.top < nextRowTop) nextRowTop = targetRect.top;
-            }
-          }
-
-          if (nextRowTop !== Infinity) {
-            const currentCenter = currentRect.left + currentRect.width / 2;
-            for (let i = 0; i < matchFocusables.length; i++) {
-              if (i === currentCardIndex) continue;
-              const targetRect = matchFocusables[i].getBoundingClientRect();
-              if (Math.abs(targetRect.top - nextRowTop) < 15) {
-                const targetCenter = targetRect.left + targetRect.width / 2;
-                const distance = Math.abs(currentCenter - targetCenter);
-                if (distance < minDistance) {
-                  minDistance = distance;
-                  bestMatch = i;
-                }
-              }
-            }
-          }
-
-          if (bestMatch !== -1) {
-            nextIndex = (isDesktopOrTV ? navCount + filterCount : filterCount) + bestMatch;
-          } else {
-            if (!isDesktopOrTV && navCount > 0) {
-              nextIndex = filterCount + matchCount;
-            } else {
-              shouldPreventDefault = false;
-            }
           }
         }
       } else if (e.key === 'ArrowUp') {
         if (isMatchCard) {
-          const currentCardIndex = currentIndex - (isDesktopOrTV ? navCount + filterCount : filterCount);
-          const currentCard = matchFocusables[currentCardIndex];
-          const currentRect = currentCard.getBoundingClientRect();
-          
-          let bestMatch = -1;
-          let minDistance = Infinity;
-          let prevRowTop = -Infinity;
-
-          for (let i = 0; i < matchFocusables.length; i++) {
-            if (i === currentCardIndex) continue;
-            const targetRect = matchFocusables[i].getBoundingClientRect();
-            if (targetRect.bottom < currentRect.top + 10) { 
-              if (targetRect.top > prevRowTop) prevRowTop = targetRect.top;
-            }
-          }
-
-          if (prevRowTop !== -Infinity) {
-            const currentCenter = currentRect.left + currentRect.width / 2;
-            for (let i = 0; i < matchFocusables.length; i++) {
-              if (i === currentCardIndex) continue;
-              const targetRect = matchFocusables[i].getBoundingClientRect();
-              if (Math.abs(targetRect.top - prevRowTop) < 15) {
-                const targetCenter = targetRect.left + targetRect.width / 2;
-                const distance = Math.abs(currentCenter - targetCenter);
-                if (distance < minDistance) {
-                  minDistance = distance;
-                  bestMatch = i;
-                }
-              }
-            }
-          }
-
-          if (bestMatch !== -1) {
-            nextIndex = (isDesktopOrTV ? navCount + filterCount : filterCount) + bestMatch;
+          // ✅ TV အတွက် getBoundingClientRect ကို ဖျက်ပြီး ရိုးရှင်းတဲ့ Index တွက်နည်းကို သုံးပါသည်
+          const columns = isDesktopOrTV ? 4 : 2;
+          if (currentIndex - columns >= (isDesktopOrTV ? navCount + filterCount : filterCount)) {
+            nextIndex = currentIndex - columns;
           } else {
-            if (isDesktopOrTV) {
-              nextIndex = navCount;
-            } else {
-              const colIndex = currentCardIndex % 4; 
-              nextIndex = categoryCount + Math.min(colIndex, statusCount - 1);
-            }
+            nextIndex = isDesktopOrTV ? navCount : 0;
           }
         } else if (isDesktopOrTV && isCategoryFilter) {
-          const catIndex = currentIndex - navCount;
-          nextIndex = Math.min(catIndex, navCount - 1);
+          nextIndex = 0;
         } else if (isDesktopOrTV && isStatusFilter) {
           nextIndex = 0;
         } else if (!isDesktopOrTV && isStatusFilter) {
-          const statusIndex = currentIndex - categoryCount;
-          if (statusIndex === 0 || statusIndex === 1) nextIndex = 0;
-          else nextIndex = 1;
+          nextIndex = 0;
         } else if (!isDesktopOrTV && isCategoryFilter) {
           shouldPreventDefault = false;
         } else if (isNav) {
@@ -260,20 +181,12 @@ function App() {
           let rawData = [];
           
           if (selectedCategory === 'chinaserver') {
-            console.log("🇨🇳 Fetching China Server data via Vercel API...");
             const response = await fetch(`/api/china-data?t=${Date.now()}`); 
-            
-            if (!response.ok) {
-              throw new Error('Failed to fetch China data from API');
-            }
-            
+            if (!response.ok) throw new Error('Failed to fetch China data from API');
             const jsonData = await response.json();
-            
             if (jsonData.code === 200 && jsonData.data && Array.isArray(jsonData.data.matches)) {
               rawData = jsonData.data.matches;
-              console.log("✅ China matches loaded:", rawData.length);
             } else {
-              console.error("❌ Invalid China API response structure");
               rawData = [];
             }
           } else if (selectedCategory === 'vnserver') {
@@ -289,12 +202,10 @@ function App() {
 
           const processedMatches = rawData.map(match => {
             const isChina = selectedCategory === 'chinaserver';
-            
             const homeName = isChina ? match.hostName : (match.home_name || match.homeTeam?.name);
             const homeLogo = isChina ? match.hostIcon : (match.home_img || match.homeTeam?.logo);
             const awayName = isChina ? match.guestName : (match.away_name || match.awayTeam?.name);
             const awayLogo = isChina ? match.guestIcon : (match.away_img || match.awayTeam?.logo);
-            
             const rawTime = isChina ? match.matchTime : match.match_time;
             const matchStatus = isChina ? (match.matchStatus === 1 || match.matchStatus === 2) : (match.match_status === true);
             const homeScore = isChina ? (match.hostScore ?? 0) : (match.homeScore ?? match.homeTeam?.score ?? 0);
@@ -302,44 +213,43 @@ function App() {
             const matchId = isChina ? match.scheduleId : match.id;
             const leagueName = isChina ? match.subCateName : match.league;
 
-                      let links = [];
-          let tempRoomNum = null; // roomNum ကို သိမ်းထားဖို့ variable
+            let links = [];
+            let tempRoomNum = null; 
 
-          if (isChina) {
-            // ❌ Dummy Link တွေကို မဖန်တီးတော့ပါ။ API ကနေ အစစ်လာမှ ပြပါမယ်။
-            if (match.anchors && match.anchors.length > 0) {
-              tempRoomNum = match.anchors[0].anchor?.roomNum || match.anchors[0].uid;
+            if (isChina) {
+              if (match.anchors && match.anchors.length > 0) {
+                tempRoomNum = match.anchors[0].anchor?.roomNum || match.anchors[0].uid;
+              }
+            } else {
+              links = match.links || [];
             }
-          } else {
-            links = match.links || [];
-          }
 
-          let dateObj;
-          if (typeof rawTime === 'number' && rawTime > 0) {
-            dateObj = new Date(rawTime);
-          } else if (typeof rawTime === 'string' && /^\d{10,}$/.test(rawTime)) {
-            dateObj = new Date(parseInt(rawTime, 10) * 1000);
-          } else {
-            dateObj = new Date(rawTime);
-          }
+            let dateObj;
+            if (typeof rawTime === 'number' && rawTime > 0) {
+              dateObj = new Date(rawTime);
+            } else if (typeof rawTime === 'string' && /^\d{10,}$/.test(rawTime)) {
+              dateObj = new Date(parseInt(rawTime, 10) * 1000);
+            } else {
+              dateObj = new Date(rawTime);
+            }
 
-          const myanmarTime = dateObj.toLocaleString('en-US', {
-            timeZone: 'Asia/Yangon', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
-          });
+            const myanmarTime = dateObj.toLocaleString('en-US', {
+              timeZone: 'Asia/Yangon', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
+            });
 
-          return {
-            id: matchId,
-            homeTeam: { name: homeName, logo: homeLogo },
-            awayTeam: { name: awayName, logo: awayLogo },
-            league: leagueName,
-            matchStatus: matchStatus, 
-            myanmarTime: myanmarTime,
-            links: links,
-            _roomNum: tempRoomNum, // ✅ roomNum ကို Match Object ထဲမှာ သိမ်းထားမယ်
-            homeScore: homeScore,
-            awayScore: awayScore,
-            timing: isChina ? match.timing : ''
-          };
+            return {
+              id: matchId,
+              homeTeam: { name: homeName, logo: homeLogo },
+              awayTeam: { name: awayName, logo: awayLogo },
+              league: leagueName,
+              matchStatus: matchStatus, 
+              myanmarTime: myanmarTime,
+              links: links,
+              _roomNum: tempRoomNum, 
+              homeScore: homeScore,
+              awayScore: awayScore,
+              timing: isChina ? match.timing : ''
+            };
           });
 
           return { success: true, data: processedMatches };
@@ -350,7 +260,7 @@ function App() {
       })();
 
       if (isInitialCheck) {
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second only
       }
 
       if (!isCancelled) {
@@ -401,7 +311,6 @@ function App() {
     prevCategoryRef.current = selectedCategory;
 
     const interval = setInterval(() => {
-      // ✅ connectionError ကို ဖယ်ထားပါတယ် (China Server အတွက် အဆက်မပြတ် Refresh လုပ်မယ်)
       if (hasLoadedOnce.current) {
         fetchData(false, false);
       }
@@ -418,35 +327,25 @@ function App() {
     setRetryTrigger(prev => prev + 1);
   };
 
-        const handleMatchClick = async (match) => {
-    // ၁။ Player Modal ကို အရင်ဖွင့်မယ် (ဒီအချိန်မှာ links တွေ မရှိသေးဘူး)
+  const handleMatchClick = async (match) => {
     setSelectedMatch(match);
     lastFocusedMatchId.current = match.id;
     window.history.pushState({ step: 1 }, '');
     
-    // ၂။ China Server ဖြစ်ပြီး _roomNum ရှိရင် Stream URL အစစ်တွေကို လှမ်းယူမယ်
     if (selectedCategory === 'chinaserver' && match._roomNum) {
       try {
-        console.log(`📡 Fetching real stream URLs for roomNum: ${match._roomNum}`);
-        
-        // Vercel Backend API ကို ခေါ်ယူခြင်း
         const response = await fetch(`/api/china-stream?roomNum=${match._roomNum}`);
         const result = await response.json();
 
         if (result.success && result.stream) {
           const newLinks = [];
-          
-          // ရှိတဲ့ Link အားလုံးကို တစ်ခါတည်း ထည့်မယ် (၄ ခုလုံး)
           if (result.stream.hdM3u8) newLinks.push({ name: "HD Stream (m3u8)", url: result.stream.hdM3u8 });
           if (result.stream.m3u8) newLinks.push({ name: "Standard (m3u8)", url: result.stream.m3u8 });
           if (result.stream.hdFlv) newLinks.push({ name: "HD Stream (FLV)", url: result.stream.hdFlv });
           if (result.stream.flv) newLinks.push({ name: "Standard (FLV)", url: result.stream.flv });
 
-          // ရလာတဲ့ Link အစစ်တွေနဲ့ Match Object ကို Update လုပ်မယ်
           setSelectedMatch(prev => ({ ...prev, links: newLinks }));
-          console.log(`✅ Successfully loaded ${newLinks.length} working stream URLs!`);
         } else {
-          console.warn("⚠️ No stream data found for this room.");
           setSelectedMatch(prev => ({ ...prev, links: [] }));
         }
       } catch (error) {
@@ -456,13 +355,7 @@ function App() {
     }
   };
 
-    const handleLinkClick = (link) => {
-    // ✅ VLC မှာ စမ်းသပ်နိုင်ဖို့ Console မှာ URL ကို အကြီးအကျယ် ပြသပေးမယ်
-    console.log("🎬 ==========================================");
-    console.log("📺 Stream Name :", link.name);
-    console.log("🔗 Stream URL  :", link.url);
-    console.log("🎬 ==========================================");
-    
+  const handleLinkClick = (link) => {
     setActiveLink(link);
   };
 
