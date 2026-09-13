@@ -38,7 +38,6 @@ function App() {
       const validKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '];
       if (!validKeys.includes(e.key)) return;
 
-      // Section အလိုက် Focusable Items များကို ရှာဖွေခြင်း
       const topNavItems = Array.from(document.querySelectorAll('.top-nav .focusable-item'));
       const categoryItems = Array.from(document.querySelectorAll('.category-filter .focusable-item'));
       const statusItems = Array.from(document.querySelectorAll('.status-filter .focusable-item'));
@@ -46,7 +45,6 @@ function App() {
 
       const currentElement = document.activeElement;
       
-      // ဘယ် Section မှာ ရောက်နေလဲ ဆုံးဖြတ်ခြင်း
       let currentSection = null;
       let currentIndexInSection = -1;
 
@@ -64,7 +62,6 @@ function App() {
         currentIndexInSection = matchCards.indexOf(currentElement);
       }
 
-      // ာမှ Focus မရောက်သေးရင် Top Nav ပထမဆုံး Item ကို Focus
       if (!currentSection) {
         topNavItems[0]?.focus();
         return;
@@ -73,7 +70,6 @@ function App() {
       let targetElement = null;
 
       if (e.key === 'ArrowRight') {
-        // ဘယ် Section မဆို ညာဘက်ကို သွားနိုင်သည်
         if (currentSection === 'topNav' && currentIndexInSection < topNavItems.length - 1) {
           targetElement = topNavItems[currentIndexInSection + 1];
         } else if (currentSection === 'category' && currentIndexInSection < categoryItems.length - 1) {
@@ -85,7 +81,6 @@ function App() {
         }
       } 
       else if (e.key === 'ArrowLeft') {
-        // ဘယ် Section မဆို ဘယ်ဘက်ကို သွားနိုင်သည်
         if (currentSection === 'topNav' && currentIndexInSection > 0) {
           targetElement = topNavItems[currentIndexInSection - 1];
         } else if (currentSection === 'category' && currentIndexInSection > 0) {
@@ -97,18 +92,13 @@ function App() {
         }
       } 
       else if (e.key === 'ArrowDown') {
-        // အောက်ကို ဆင်းသက်ခြင်း (Section တစ်ခုမှ တစ်ခုသို့)
         if (currentSection === 'topNav') {
-          // Top Nav ကနေ အောက်ဆင်းရင် Category (VN Server) ကို သွားမယ်
           targetElement = categoryItems[0];
         } else if (currentSection === 'category') {
-          // Category ကနေ အောက်ဆင်းရင် Status (All) ကို သွားမယ်
           targetElement = statusItems[0];
         } else if (currentSection === 'status') {
-          // Status ကနေ အောက်ဆင်းရင် ပထမဆုံး Match Card ကို သွားမယ်
           targetElement = matchCards[0];
         } else if (currentSection === 'matches') {
-          // Match Cards အတွင်းမှာ အောက်ဆင်းရင် 4 တန်း (Grid) ယူဆပြီး သွားမယ်
           const columns = 4;
           const nextIndex = currentIndexInSection + columns;
           if (nextIndex < matchCards.length) {
@@ -117,25 +107,18 @@ function App() {
         }
       } 
       else if (e.key === 'ArrowUp') {
-        // အပေါ်ကို ပြန်တက်ခြင်း (Section တစ်ခုမှ တစ်ခုသို့)
         if (currentSection === 'matches') {
-          // Match Cards ကနေ အပေါ်တက်ရင် Status ကို ပြန်သွားမယ်
-          // လက်ရှိ Card ရဲ့ Column အနေအထားအရ Status မှာ ဘယ်ဟာနဲ့ ညှိမလဲ
           const columns = 4;
           const currentColumn = currentIndexInSection % columns;
-          // Status မှာ 3 ခုပဲရှိတဲ့အတွက် 0, 1, 2 အထိပဲ ရမယ်
           const targetStatusIndex = Math.min(currentColumn, statusItems.length - 1);
           targetElement = statusItems[targetStatusIndex];
         } else if (currentSection === 'status') {
-          // Status ကနေ အပေါ်တက်ရင် Category ကို ပြန်သွားမယ်
           const targetCategoryIndex = Math.min(currentIndexInSection, categoryItems.length - 1);
           targetElement = categoryItems[targetCategoryIndex];
         } else if (currentSection === 'category') {
-          // Category ကနေ အပေါ်တက်ရင် Top Nav ကို ပြန်သွားမယ်
           const targetNavIndex = Math.min(currentIndexInSection, topNavItems.length - 1);
           targetElement = topNavItems[targetNavIndex];
         }
-        // Top Nav မှာဆိုရင် အပေါ်ကို ထပ်မတက်နိုင်တော့
       } 
       else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -152,7 +135,6 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown);
 
-    // Page ဖွင့်ဖွင့်ချင်း Top Nav ပထမဆုံး Item (Live Events) မှာ Focus
     const timer = setTimeout(() => {
       const firstNavItem = document.querySelector('.top-nav .focusable-item');
       if (firstNavItem) {
@@ -175,9 +157,23 @@ function App() {
     }
   }, []);
 
-  // ၃။ Data Fetching Logic
+  // ၃။ Data Fetching Logic (with Timeout)
   useEffect(() => {
     let isCancelled = false;
+
+    // ✅ Fetch Timeout Helper Function (8 စက္ကန့်)
+    const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(id);
+        return response;
+      } catch (error) {
+        clearTimeout(id);
+        throw new Error("Network request timed out");
+      }
+    };
 
     const fetchData = async (isInitialCheck, isCategoryChanged = false) => {
       if (isInitialCheck) {
@@ -189,20 +185,21 @@ function App() {
       const fetchPromise = (async () => {
         try {
           let rawData = [];
+          
           if (selectedCategory === 'chinaserver') {
-            const response = await fetch(`/api/china-data?t=${Date.now()}`); 
+            const response = await fetchWithTimeout(`/api/china-data?t=${Date.now()}`); 
             if (!response.ok) throw new Error('Failed to fetch China data');
             const jsonData = await response.json();
             if (jsonData.code === 200 && jsonData.data && Array.isArray(jsonData.data.matches)) {
               rawData = jsonData.data.matches;
             }
           } else if (selectedCategory === 'vnserver') {
-            const response = await fetch(`https://raw.githubusercontent.com/devxseven/mdata/refs/heads/main/matches.json?t=${Date.now()}`);
+            const response = await fetchWithTimeout(`https://cdn.jsdelivr.net/gh/devxseven/mdata@main/matches.json?t=${Date.now()}`);
             if (!response.ok) throw new Error('Failed to fetch VN data');
             const data = await response.json();
             rawData = data.context || [];
           } else if (selectedCategory === 'myanmarsound') {
-            const response = await fetch(`/api/fmp-data?t=${Date.now()}`); 
+            const response = await fetchWithTimeout(`/api/fmp-data?t=${Date.now()}`); 
             if (!response.ok) throw new Error('Failed to fetch FMP data');
             rawData = await response.json(); 
           }
@@ -337,7 +334,7 @@ function App() {
           setSelectedMatch(prev => ({ ...prev, links: [] }));
         }
       } catch (error) {
-        console.error("❌ Failed to fetch stream details:", error);
+        console.error(" Failed to fetch stream details:", error);
         setSelectedMatch(prev => ({ ...prev, links: [] }));
       }
     }
