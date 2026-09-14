@@ -1,3 +1,4 @@
+// မူရင်း VideoPlayer.jsx (အစပိုင်းက ပေးပို့ခဲ့တဲ့ Code အတိုင်း ပြန်ထားပါ)
 import { useEffect } from 'react';
 import { openExternalPlayer } from '../utils/openExternalPlayer';
 import './VideoPlayer.css';
@@ -5,30 +6,31 @@ import './VideoPlayer.css';
 export default function VideoPlayer({ match, onLinkClick, onClose }) {
   const { homeTeam, awayTeam, league, myanmarTime, links } = match;
 
-    const handleStreamClick = (link) => {
+  const handleStreamClick = (link) => {
     openExternalPlayer(link.url);
-    // Modal ကို ချက်ချင်းမပိတ်ဘဲ Parent ကို အသိပေးမယ်
     if (onLinkClick) {
       onLinkClick(link);
     }
   };
 
-  // Link name ကို တိုအောင် ဖြတ်ပေးမည့် function
   const shortenLinkName = (name) => {
     if (!name) return 'Stream';
-    // "VS" ပါရင် နောက်ပိုင်းကို ဖျက်မယ်
     if (name.includes('VS') || name.includes('vs')) {
       const parts = name.split(/VS|vs/);
       return parts[0].trim();
     }
-    // ၃၀ လုံးကျော်ရင် ြတ်မယ်
     if (name.length > 30) {
       return name.substring(0, 30) + '...';
     }
     return name;
   };
 
-  // 🎯 Keyboard Navigation Logic for Stream Links
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       const focusable = Array.from(document.querySelectorAll('.link-card'));
@@ -54,30 +56,24 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
       if (e.key === 'ArrowRight') {
         if (currentIndex < focusable.length - 1) nextIndex = currentIndex + 1;
         else shouldPreventDefault = false;
-      } 
-      else if (e.key === 'ArrowLeft') {
+      } else if (e.key === 'ArrowLeft') {
         if (currentIndex > 0) nextIndex = currentIndex - 1;
         else shouldPreventDefault = false;
-      } 
-      else if (e.key === 'ArrowDown') {
+      } else if (e.key === 'ArrowDown') {
         if (currentIndex + columns < focusable.length) nextIndex = currentIndex + columns;
         else shouldPreventDefault = false;
-      } 
-      else if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp') {
         if (currentIndex - columns >= 0) nextIndex = currentIndex - columns;
         else shouldPreventDefault = false;
-      } 
-      else if (e.key === 'Enter' || e.key === 'Ok' || e.key === ' ') {
+      } else if (e.key === 'Enter' || e.key === 'Ok' || e.key === ' ') {
         e.preventDefault();
         if (currentIndex !== -1) current.click();
         return;
-      } 
-      else if (e.key === 'Escape' || e.key === 'Backspace') {
+      } else if (e.key === 'Escape' || e.key === 'Backspace') {
         e.preventDefault();
         onClose();
         return;
-      } 
-      else {
+      } else {
         return;
       }
 
@@ -91,19 +87,20 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
 
     window.addEventListener('keydown', handleKeyDown);
     
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const firstCard = document.querySelector('.link-card');
       if (firstCard) firstCard.focus();
-    }, 100);
+    }, 300);
 
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(timer);
+    };
   }, [links, onClose]);
 
   return (
-    <div className="video-player-overlay" onClick={onClose}>
+    <div className="video-player-overlay" onClick={handleBackdropClick}>
       <div className="links-selection" onClick={(e) => e.stopPropagation()}>
-        
-        {/* Header Section */}
         <div className="player-header">
           <div className="match-info">
             <h2>{homeTeam.name} VS {awayTeam.name}</h2>
@@ -115,13 +112,12 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
           <button onClick={onClose} className="close-btn">✕</button>
         </div>
         
-        {/* Links Section */}
         <div className="links-section">
           <h3>Channels ({links ? links.length : 0})</h3>
           
-         {!links || links.length === 0 ? (
+          {!links || links.length === 0 ? (
             <div className="no-links">
-              <p>⏳ Loading streams... (ကျေးဇူးပြု၍ စောင့်ပါ)</p>
+              <p>{match._roomNum ? ' Loading streams... (ကျေးဇူးပြု၍ စောင့်ပါ)' : '️ No streams available for this match.'}</p>
             </div>
           ) : (
             <div className="links-grid">
@@ -129,7 +125,7 @@ export default function VideoPlayer({ match, onLinkClick, onClose }) {
                 <button
                   key={index}
                   className="link-card focusable-item"
-                    onClick={() => handleStreamClick(link)}
+                  onClick={() => handleStreamClick(link)}
                   tabIndex={0}
                 >
                   <div className="link-icon">📺</div>

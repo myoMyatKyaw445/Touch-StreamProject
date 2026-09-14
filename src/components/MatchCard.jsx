@@ -5,12 +5,12 @@ function MatchCard({ match, category, onClick }) {
 
   return (
     <div 
-      className="match-card focusable-item" 
-      onClick={() => onClick(match)}
-      tabIndex={0}
-      data-match-id={match.id}
-      role="button"
-    >
+  className="match-card focusable-item" 
+  onClick={(e) => onClick(e, match)} // ✅ e ကို ထည့်ပေးလိုက်ပါ
+  tabIndex={0}
+  data-match-id={match.id}
+  role="button"
+>
       <div className="timer-badge">{myanmarTime}</div>
       <div className="teams-section">
         <div className="team home-team">

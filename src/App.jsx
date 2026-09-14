@@ -4,7 +4,6 @@ import CategoryFilter from './components/CategoryFilter';
 import StatusFilter from './components/StatusFilter';
 import MatchCard from './components/MatchCard';
 import BottomNav from './components/BottomNav';
-import VideoPlayer from './components/VideoPlayer';
 import './App.css';
 
 function App() {
@@ -14,10 +13,12 @@ function App() {
   const [connectionError, setConnectionError] = useState(false);
   const [retryTrigger, setRetryTrigger] = useState(0);
   const [activeNav, setActiveNav] = useState('live');
-  const [selectedMatch, setSelectedMatch] = useState(null);
+  
+  const [activeMatch, setActiveMatch] = useState(null); 
   const [activeLink, setActiveLink] = useState(null);
+  
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('vnserver');
+  const [selectedCategory, setSelectedCategory] = useState('chinaserver');
   
   const [categoryCounts, setCategoryCounts] = useState({ vnserver: 0, myanmarsound: 0, chinaserver: 0 });
   const [statuses, setStatuses] = useState([
@@ -28,12 +29,26 @@ function App() {
 
   const lastFocusedMatchId = useRef(null);
   const hasLoadedOnce = useRef(false);
-  const prevCategoryRef = useRef('vnserver');
+  const prevCategoryRef = useRef('chinaserver');
+  const closeBtnRef = useRef(null); 
 
-  // ✅ Perfect Section-based Navigation
+  // ✅ Focus ပြန်ပို့မည့် Function
+  const restoreFocus = () => {
+    setTimeout(() => {
+      if (lastFocusedMatchId.current) {
+        const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
+        if (matchCard) {
+          matchCard.focus();
+          matchCard.scrollIntoView({ behavior: 'auto', block: 'center' });
+        }
+      }
+    }, 100);
+  };
+
+  // ✅ Perfect Section-based Navigation (အပြင်ဘက် Navigation)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (selectedMatch) return;
+      if (activeMatch) return; 
 
       const validKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '];
       if (!validKeys.includes(e.key)) return;
@@ -44,69 +59,38 @@ function App() {
       const matchCards = Array.from(document.querySelectorAll('.matches-list .focusable-item'));
 
       const currentElement = document.activeElement;
-      
       let currentSection = null;
       let currentIndexInSection = -1;
 
-      if (topNavItems.includes(currentElement)) {
-        currentSection = 'topNav';
-        currentIndexInSection = topNavItems.indexOf(currentElement);
-      } else if (categoryItems.includes(currentElement)) {
-        currentSection = 'category';
-        currentIndexInSection = categoryItems.indexOf(currentElement);
-      } else if (statusItems.includes(currentElement)) {
-        currentSection = 'status';
-        currentIndexInSection = statusItems.indexOf(currentElement);
-      } else if (matchCards.includes(currentElement)) {
-        currentSection = 'matches';
-        currentIndexInSection = matchCards.indexOf(currentElement);
-      }
+      if (topNavItems.includes(currentElement)) { currentSection = 'topNav'; currentIndexInSection = topNavItems.indexOf(currentElement); } 
+      else if (categoryItems.includes(currentElement)) { currentSection = 'category'; currentIndexInSection = categoryItems.indexOf(currentElement); } 
+      else if (statusItems.includes(currentElement)) { currentSection = 'status'; currentIndexInSection = statusItems.indexOf(currentElement); } 
+      else if (matchCards.includes(currentElement)) { currentSection = 'matches'; currentIndexInSection = matchCards.indexOf(currentElement); }
 
-      if (!currentSection) {
-        topNavItems[0]?.focus();
-        return;
-      }
+      if (!currentSection) { topNavItems[0]?.focus(); return; }
 
       let targetElement = null;
 
       if (e.key === 'ArrowRight') {
-        if (currentSection === 'topNav' && currentIndexInSection < topNavItems.length - 1) {
-          targetElement = topNavItems[currentIndexInSection + 1];
-        } else if (currentSection === 'category' && currentIndexInSection < categoryItems.length - 1) {
-          targetElement = categoryItems[currentIndexInSection + 1];
-        } else if (currentSection === 'status' && currentIndexInSection < statusItems.length - 1) {
-          targetElement = statusItems[currentIndexInSection + 1];
-        } else if (currentSection === 'matches' && currentIndexInSection < matchCards.length - 1) {
-          targetElement = matchCards[currentIndexInSection + 1];
-        }
-      } 
-      else if (e.key === 'ArrowLeft') {
-        if (currentSection === 'topNav' && currentIndexInSection > 0) {
-          targetElement = topNavItems[currentIndexInSection - 1];
-        } else if (currentSection === 'category' && currentIndexInSection > 0) {
-          targetElement = categoryItems[currentIndexInSection - 1];
-        } else if (currentSection === 'status' && currentIndexInSection > 0) {
-          targetElement = statusItems[currentIndexInSection - 1];
-        } else if (currentSection === 'matches' && currentIndexInSection > 0) {
-          targetElement = matchCards[currentIndexInSection - 1];
-        }
-      } 
-      else if (e.key === 'ArrowDown') {
-        if (currentSection === 'topNav') {
-          targetElement = categoryItems[0];
-        } else if (currentSection === 'category') {
-          targetElement = statusItems[0];
-        } else if (currentSection === 'status') {
-          targetElement = matchCards[0];
-        } else if (currentSection === 'matches') {
+        if (currentSection === 'topNav' && currentIndexInSection < topNavItems.length - 1) targetElement = topNavItems[currentIndexInSection + 1];
+        else if (currentSection === 'category' && currentIndexInSection < categoryItems.length - 1) targetElement = categoryItems[currentIndexInSection + 1];
+        else if (currentSection === 'status' && currentIndexInSection < statusItems.length - 1) targetElement = statusItems[currentIndexInSection + 1];
+        else if (currentSection === 'matches' && currentIndexInSection < matchCards.length - 1) targetElement = matchCards[currentIndexInSection + 1];
+      } else if (e.key === 'ArrowLeft') {
+        if (currentSection === 'topNav' && currentIndexInSection > 0) targetElement = topNavItems[currentIndexInSection - 1];
+        else if (currentSection === 'category' && currentIndexInSection > 0) targetElement = categoryItems[currentIndexInSection - 1];
+        else if (currentSection === 'status' && currentIndexInSection > 0) targetElement = statusItems[currentIndexInSection - 1];
+        else if (currentSection === 'matches' && currentIndexInSection > 0) targetElement = matchCards[currentIndexInSection - 1];
+      } else if (e.key === 'ArrowDown') {
+        if (currentSection === 'topNav') targetElement = categoryItems[0];
+        else if (currentSection === 'category') targetElement = statusItems[0];
+        else if (currentSection === 'status') targetElement = matchCards[0];
+        else if (currentSection === 'matches') {
           const columns = 4;
           const nextIndex = currentIndexInSection + columns;
-          if (nextIndex < matchCards.length) {
-            targetElement = matchCards[nextIndex];
-          }
+          if (nextIndex < matchCards.length) targetElement = matchCards[nextIndex];
         }
-      } 
-      else if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp') {
         if (currentSection === 'matches') {
           const columns = 4;
           const currentColumn = currentIndexInSection % columns;
@@ -119,8 +103,7 @@ function App() {
           const targetNavIndex = Math.min(currentIndexInSection, topNavItems.length - 1);
           targetElement = topNavItems[targetNavIndex];
         }
-      } 
-      else if (e.key === 'Enter' || e.key === ' ') {
+      } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         currentElement.click();
         return;
@@ -134,35 +117,57 @@ function App() {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
     const timer = setTimeout(() => {
       const firstNavItem = document.querySelector('.top-nav .focusable-item');
-      if (firstNavItem) {
-        firstNavItem.focus();
-      }
+      if (firstNavItem) firstNavItem.focus();
     }, 800);
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      clearTimeout(timer);
-    };
-  }, [selectedMatch, matches.length]);
+    return () => { window.removeEventListener('keydown', handleKeyDown); clearTimeout(timer); };
+  }, [activeMatch, matches.length]);
 
-  // ၂။ Scroll Restoration Logic
+  // ✅ Stream Panel အတွင်းပိုင်း Navigation
+  useEffect(() => {
+    if (!activeMatch) return;
+
+    const handlePanelKeyDown = (e) => {
+      const buttons = Array.from(document.querySelectorAll('.stream-btn'));
+      if (buttons.length === 0) return;
+
+      const current = document.activeElement;
+      const currentIndex = buttons.indexOf(current);
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextIndex = (currentIndex + 1) % buttons.length;
+        buttons[nextIndex].focus();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prevIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+        buttons[prevIndex].focus();
+      } else if (e.key === 'Escape' || e.key === 'Backspace') {
+        e.preventDefault();
+        handleClosePanel();
+      }
+    };
+
+    setTimeout(() => {
+      if (closeBtnRef.current) closeBtnRef.current.focus();
+    }, 100);
+
+    window.addEventListener('keydown', handlePanelKeyDown);
+    return () => window.removeEventListener('keydown', handlePanelKeyDown);
+  }, [activeMatch]);
+
   useEffect(() => {
     const mainContent = document.querySelector('.main-content');
     if (mainContent) mainContent.scrollTop = 0;
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
   }, []);
 
-  // ၃။ Data Fetching Logic (with Timeout)
+  // Data Fetching Logic
   useEffect(() => {
     let isCancelled = false;
-
-    // ✅ Fetch Timeout Helper Function (8 စက္ကန့်)
-    const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
+    const fetchWithTimeout = async (url, options = {}, timeout = 15000) => {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), timeout);
       try {
@@ -176,32 +181,34 @@ function App() {
     };
 
     const fetchData = async (isInitialCheck, isCategoryChanged = false) => {
-      if (isInitialCheck) {
-        setInitialCheck(true);
-        setConnectionError(false);
-      }
+      if (isInitialCheck) { setInitialCheck(true); setConnectionError(false); }
       if (isCategoryChanged && !isInitialCheck) setLoading(true);
 
       const fetchPromise = (async () => {
         try {
           let rawData = [];
-          
           if (selectedCategory === 'chinaserver') {
             const response = await fetchWithTimeout(`/api/china-data?t=${Date.now()}`); 
             if (!response.ok) throw new Error('Failed to fetch China data');
-            const jsonData = await response.json();
-            if (jsonData.code === 200 && jsonData.data && Array.isArray(jsonData.data.matches)) {
-              rawData = jsonData.data.matches;
-            }
+            const text = await response.text();
+            let jsonData;
+            try { jsonData = JSON.parse(text); } catch (e) { throw new Error("Invalid JSON"); }
+            if (Array.isArray(jsonData)) rawData = jsonData;
+            else if (jsonData.matches && Array.isArray(jsonData.matches)) rawData = jsonData.matches;
+            else if (jsonData.data && Array.isArray(jsonData.data.matches)) rawData = jsonData.data.matches;
+            else rawData = [];
           } else if (selectedCategory === 'vnserver') {
-            const response = await fetchWithTimeout(`https://cdn.jsdelivr.net/gh/devxseven/mdata@main/matches.json?t=${Date.now()}`);
+            const response = await fetchWithTimeout(`https://raw.githubusercontent.com/devxseven/mdata/refs/heads/main/matches.json?t=${Date.now()}`);
             if (!response.ok) throw new Error('Failed to fetch VN data');
             const data = await response.json();
             rawData = data.context || [];
           } else if (selectedCategory === 'myanmarsound') {
             const response = await fetchWithTimeout(`/api/fmp-data?t=${Date.now()}`); 
             if (!response.ok) throw new Error('Failed to fetch FMP data');
-            rawData = await response.json(); 
+            const text = await response.text();
+            let jsonData;
+            try { jsonData = JSON.parse(text); } catch (e) { throw new Error("Invalid JSON"); }
+            rawData = jsonData; 
           }
 
           const processedMatches = rawData.map(match => {
@@ -220,9 +227,7 @@ function App() {
             let links = [];
             let tempRoomNum = null; 
             if (isChina) {
-              if (match.anchors && match.anchors.length > 0) {
-                tempRoomNum = match.anchors[0].anchor?.roomNum || match.anchors[0].uid;
-              }
+              if (match.anchors && match.anchors.length > 0) tempRoomNum = match.anchors[0].anchor?.roomNum || match.anchors[0].uid;
             } else {
               links = match.links || [];
             }
@@ -237,17 +242,9 @@ function App() {
             });
 
             return {
-              id: matchId,
-              homeTeam: { name: homeName, logo: homeLogo },
-              awayTeam: { name: awayName, logo: awayLogo },
-              league: leagueName,
-              matchStatus: matchStatus, 
-              myanmarTime: myanmarTime,
-              links: links,
-              _roomNum: tempRoomNum, 
-              homeScore: homeScore,
-              awayScore: awayScore,
-              timing: isChina ? match.timing : ''
+              id: matchId, homeTeam: { name: homeName, logo: homeLogo }, awayTeam: { name: awayName, logo: awayLogo },
+              league: leagueName, matchStatus: matchStatus, myanmarTime: myanmarTime, links: links,
+              _roomNum: tempRoomNum, homeScore: homeScore, awayScore: awayScore, timing: isChina ? match.timing : ''
             };
           });
 
@@ -266,118 +263,107 @@ function App() {
           setMatches(result.data);
           const liveCount = result.data.filter(m => m.matchStatus).length;
           const upcomingCount = result.data.filter(m => !m.matchStatus).length;
-          
           setCategoryCounts(prev => ({ ...prev, [selectedCategory]: result.data.length }));
           setStatuses([
             { id: 'all', name: 'All', count: result.data.length },
             { id: 'live', name: 'Live', count: liveCount },
             { id: 'upcoming', name: 'Upcoming', count: upcomingCount },
           ]);
-          
-          if (isInitialCheck) {
-            setInitialCheck(false);
-            hasLoadedOnce.current = true;
-          }
+          if (isInitialCheck) { setInitialCheck(false); hasLoadedOnce.current = true; }
           if (isCategoryChanged && !isInitialCheck) setLoading(false);
         } else {
-          if (isInitialCheck) {
-            setInitialCheck(false);
-            setConnectionError(true);
-          }
-          if (isCategoryChanged && !isInitialCheck) {
-            setMatches([]); 
-            setConnectionError(true);
-            setLoading(false);
-          }
+          if (isInitialCheck) { setInitialCheck(false); setConnectionError(true); hasLoadedOnce.current = true; }
+          if (isCategoryChanged && !isInitialCheck) { setMatches([]); setConnectionError(true); setLoading(false); }
         }
       }
     };
 
     const isCategoryChanged = prevCategoryRef.current !== selectedCategory;
     if (!hasLoadedOnce.current) fetchData(true, false);
-    else fetchData(false, isCategoryChanged);
-    
+    else if (isCategoryChanged) fetchData(false, true);
     prevCategoryRef.current = selectedCategory;
 
     const interval = setInterval(() => {
-      if (hasLoadedOnce.current) fetchData(false, false);
+      if (hasLoadedOnce.current && !connectionError) fetchData(false, false);
     }, 15000);
 
-    return () => {
-      isCancelled = true;
-      clearInterval(interval);
-    };
-  }, [selectedCategory, retryTrigger, connectionError]);
+    return () => { isCancelled = true; clearInterval(interval); };
+  }, [selectedCategory, retryTrigger]);
 
   const handleRetry = () => {
     hasLoadedOnce.current = false;
+    setConnectionError(false);
     setRetryTrigger(prev => prev + 1);
   };
 
-  const handleMatchClick = async (match) => {
-    setSelectedMatch(match);
+  // ✅ ၁။ Match Card နှိပ်ရင် History မှာ မှတ်တမ်းတင်ပြီး Panel ဖွင့်မည်
+  const handleMatchClick = (e, match) => {
+    if (e) e.preventDefault();
     lastFocusedMatchId.current = match.id;
-    window.history.pushState({ step: 1 }, '');
     
+    // ✅ Browser History မှာ Panel ဖွင့်ထားကြောင်း Push လုပ်လိုက်ပါ
+    window.history.pushState({ panelOpen: true, matchId: match.id }, '');
+    
+    setActiveMatch({ ...match, links: [] }); 
+
     if (selectedCategory === 'chinaserver' && match._roomNum) {
-      try {
-        const response = await fetch(`/api/china-stream?roomNum=${match._roomNum}`);
-        const result = await response.json();
-        if (result.success && result.stream) {
-          const newLinks = [];
-          if (result.stream.hdM3u8) newLinks.push({ name: "HD Stream (m3u8)", url: result.stream.hdM3u8 });
-          if (result.stream.m3u8) newLinks.push({ name: "Standard (m3u8)", url: result.stream.m3u8 });
-          if (result.stream.hdFlv) newLinks.push({ name: "HD Stream (FLV)", url: result.stream.hdFlv });
-          if (result.stream.flv) newLinks.push({ name: "Standard (FLV)", url: result.stream.flv });
-          setSelectedMatch(prev => ({ ...prev, links: newLinks }));
-        } else {
-          setSelectedMatch(prev => ({ ...prev, links: [] }));
+      const fetchStream = async () => {
+        try {
+          const response = await fetch(`/api/china-stream?roomNum=${match._roomNum}`);
+          const result = await response.json();
+          if (result.success && result.stream) {
+            const newLinks = [];
+            if (result.stream.hdM3u8) newLinks.push({ name: "HD Stream (m3u8)", url: result.stream.hdM3u8 });
+            if (result.stream.m3u8) newLinks.push({ name: "Standard (m3u8)", url: result.stream.m3u8 });
+            if (result.stream.hdFlv) newLinks.push({ name: "HD Stream (FLV)", url: result.stream.hdFlv });
+            if (result.stream.flv) newLinks.push({ name: "Standard (FLV)", url: result.stream.flv });
+            setActiveMatch(prev => prev ? { ...prev, links: newLinks } : null);
+          } else {
+            setActiveMatch(prev => prev ? { ...prev, links: [] } : null);
+          }
+        } catch (error) {
+          console.error("❌ Failed to fetch stream details:", error);
+          setActiveMatch(prev => prev ? { ...prev, links: [] } : null);
         }
-      } catch (error) {
-        console.error(" Failed to fetch stream details:", error);
-        setSelectedMatch(prev => ({ ...prev, links: [] }));
-      }
+      };
+      fetchStream();
+    } else {
+      setTimeout(() => {
+        setActiveMatch(prev => prev ? { ...prev, links: match.links || [] } : null);
+      }, 100);
     }
   };
 
-  const handleLinkClick = (link) => setActiveLink(link);
-
-  const handleClosePlayer = () => {
-    setSelectedMatch(null);
-    setActiveLink(null);
-    window.history.back(); 
-    setTimeout(() => {
-      if (lastFocusedMatchId.current) {
-        const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
-        if (matchCard) {
-          matchCard.focus();
-          matchCard.scrollIntoView({ behavior: 'auto', block: 'center' });
-        }
-      }
-    }, 100);
+  // ✅ ၂။ Panel ကို ပိတ်မည် (History ကို Back ချပြီး popstate ကို အလုပ်လုပ်ခိုင်းမယ်)
+  const handleClosePanel = () => {
+    if (window.history.state && window.history.state.panelOpen) {
+      window.history.back(); // ဒါက popstate event ကို ဖြစ်စေပြီး အောက်က useEffect က အလုပ်လုပ်ပါလိမ့်မယ်
+    } else {
+      setActiveMatch(null);
+      setActiveLink(null);
+      restoreFocus();
+    }
   };
 
+  // ✅ ၃။ Android/Browser Back Key ကို ဖမ်းယူမည့် Logic
   useEffect(() => {
     const handlePopState = (event) => {
-      const state = event.state;
-      const isRoot = !state || state.step === undefined || state.step === null;
-      if (isRoot) {
-        setSelectedMatch(null);
+      // Panel ဖွင့်နေရင် Back Key နှိပ်လိုက်တာနဲ့ Panel ကို ပိတ်ပြီး Focus ပြန်ပို့မယ်
+      if (activeMatch) {
+        setActiveMatch(null);
         setActiveLink(null);
-        setTimeout(() => {
-          if (lastFocusedMatchId.current) {
-            const matchCard = document.querySelector(`[data-match-id="${lastFocusedMatchId.current}"]`);
-            if (matchCard) {
-              matchCard.focus();
-              matchCard.scrollIntoView({ behavior: 'auto', block: 'center' });
-            }
-          }
-        }, 100);
-      } 
+        restoreFocus();
+      }
     };
+    
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []); 
+  }, [activeMatch]);
+
+  const handleLinkClick = (link) => {
+    setActiveLink(link);
+    import('./utils/openExternalPlayer').then(mod => mod.openExternalPlayer(link.url));
+  };
 
   const filteredMatches = matches.filter(match => {
     if (selectedStatus === 'live') return match.matchStatus === true;
@@ -409,7 +395,7 @@ function App() {
         <div className="error-content">
           <div className="error-icon">🌐</div>
           <h2 className="error-title">ချိတ်ဆက်မှု မှားယွင်းနေသည်</h2>
-          <p className="error-message">ကျေးဇူးပြု၍ VPN အသုံးပြုပါ<br />သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ</p>
+          <p className="error-message">ကျေးဇူးပြု VPN အသုံးပြုပါ<br />သို့မဟုတ် အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ</p>
           <button className="retry-button" onClick={handleRetry}>🔄 ပြန်လည်စစ်ဆေးပါ</button>
         </div>
       </div>
@@ -440,6 +426,31 @@ function App() {
       </div>
       
       <main className="main-content">
+        {activeMatch && (
+          <div className="stream-panel">
+            <div className="panel-header">
+              <h3>{activeMatch.homeTeam.name} VS {activeMatch.awayTeam.name}</h3>
+              <button ref={closeBtnRef} className="close-panel-btn" onClick={handleClosePanel}>✕ ပိတ်မည်</button>
+            </div>
+            
+            {!activeMatch.links || activeMatch.links.length === 0 ? (
+              <p className="loading-text" style={{textAlign: 'center', padding: '20px', color: '#ccc'}}>⏳ Loading streams... (ကျေးဇူးပြု စောင့်ပါ)</p>
+            ) : (
+              <div className="stream-buttons-grid">
+                {activeMatch.links.map((link, index) => (
+                  <button 
+                    key={index} 
+                    className="stream-btn focusable-item"
+                    onClick={() => handleLinkClick(link)}
+                  >
+                    📺 {link.name || `Stream ${index + 1}`}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <div className="loading"><div className="spinner"></div><p>Loading matches...</p></div>
         ) : filteredMatches.length === 0 ? (
@@ -457,15 +468,6 @@ function App() {
           </div>
         )}
       </main>
-
-      {selectedMatch && (
-        <VideoPlayer 
-          match={selectedMatch} 
-          activeLink={activeLink}
-          onLinkClick={handleLinkClick}
-          onClose={handleClosePlayer}
-        />
-      )}
     </div>
   );
 }
