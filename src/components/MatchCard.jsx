@@ -1,4 +1,6 @@
-export default function MatchCard({ match, category, onClick }) {
+import { memo } from 'react'; // ✅ memo ကို Import လုပ်ပါ
+
+function MatchCard({ match, category, onClick }) {
   const { homeTeam, awayTeam, league, myanmarTime, matchStatus, homeScore, awayScore } = match;
 
   return (
@@ -47,3 +49,6 @@ export default function MatchCard({ match, category, onClick }) {
     </div>
   );
 }
+
+// ✅ Component ကို memo နဲ့ Wrap ထုတ်လိုက်ပါ (အရေးကြီးဆုံးအဆင့်)
+export default memo(MatchCard);

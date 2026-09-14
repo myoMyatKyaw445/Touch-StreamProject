@@ -1446,3 +1446,26 @@ body {
     will-change: auto;
   }
 }
+
+/* ========================================== */
+/* TV PERFORMANCE FIX: Disable Live Animation */
+/* ========================================== */
+@media (min-width: 1024px) {
+  /* Live Badge Animation ကို ပိတ်ခြင်း */
+  .live-badge {
+    animation: none !important;
+    -webkit-animation: none !important;
+  }
+
+  /* Match Card တွေကို GPU Layer မှာထားပြီး Repaint မဖြစ်အောင် ကာကွယ်ခြင်း */
+  .match-card {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Focus ဖြစ်တဲ့အခါ Transition ကို လုံးဝပိတ်ခြင်း */
+  .focusable-item {
+    transition: none !important;
+  }
+}
