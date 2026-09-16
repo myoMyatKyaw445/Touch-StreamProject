@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   try {
     // GitHub Raw URL ကနေ Data ကို ဆွဲယူမယ်
     const response = await fetch(
-      "https://raw.githubusercontent.com/myoMyatKyaw445/m_live_data/main/fmp_data.json",
+      "https://raw.githubusercontent.com/appeton778-coder/mmServer/main/mmserver_data.json",
       {
         // ၆၀ စက္ကန့်အတွင်း င်လာတဲ့ Request အကုန်လုံးကို Cache လုပ်ထားမယ် (GitHub မပိတ်အောင်)
         next: { revalidate: 5 } 
