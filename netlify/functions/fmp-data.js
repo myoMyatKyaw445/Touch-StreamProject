@@ -3,7 +3,7 @@
 export const handler = async (event, context) => {
   try {
     const response = await fetch(
-      "https://raw.githubusercontent.com/myoMyatKyaw445/m_live_data/main/fmp_data.json"
+      "https://raw.githubusercontent.com/appeton778-coder/mmServer/main/mmserver_data.json"
     );
 
     if (!response.ok) {
